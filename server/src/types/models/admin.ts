@@ -4,13 +4,3 @@ export interface Admin {
   created_at: Date;
   vanished: boolean;
 }
-
-export interface AdminInsertParams {
-  discord_id: string;
-  vanished?: boolean;
-}
-
-export interface AdminUpdateParams {
-  discord_id: string;
-  vanished: boolean;
-}

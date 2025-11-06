@@ -7,6 +7,9 @@ export class AdminQueries {
 
   /**
    * Finds an admin by Discord ID
+   *
+   * @param discordId - Discord ID to look for
+   * @returns Returns the Admin from DB
    */
   async findByDiscordId(discordId: string): Promise<Admin | null> {
     try {
@@ -27,6 +30,9 @@ export class AdminQueries {
 
   /**
    * Checks if a Discord ID belongs to an admin
+   *
+   * @param discordId - Discord ID to look for
+   * @returns True if the user is an admin
    */
   async isAdmin(discordId: string): Promise<boolean> {
     if (!discordId) return false;
@@ -45,6 +51,8 @@ export class AdminQueries {
 
   /**
    * Gets all admins
+   *
+   * @returns All admins from DB
    */
   async getAll(): Promise<Admin[]> {
     try {
@@ -54,70 +62,6 @@ export class AdminQueries {
       return result.rows;
     } catch (error) {
       logger.error("Failed to get all admins:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Creates a new admin
-   */
-  async create(discordId: string): Promise<Admin> {
-    try {
-      const result = await this.db.query<Admin>(
-        `INSERT INTO admins (discord_id)
-         VALUES ($1)
-         RETURNING *`,
-        [discordId]
-      );
-
-      logger.info("Admin created:", discordId);
-      return result.rows[0];
-    } catch (error) {
-      logger.error("Failed to create admin:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Updates an admin's vanished status
-   */
-  async updateVanished(
-    discordId: string,
-    vanished: boolean
-  ): Promise<Admin | null> {
-    try {
-      const result = await this.db.query<Admin>(
-        `UPDATE admins
-         SET vanished = $2
-         WHERE discord_id = $1
-         RETURNING *`,
-        [discordId, vanished]
-      );
-
-      return result.rows[0] || null;
-    } catch (error) {
-      logger.error("Failed to update admin vanished status:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Deletes an admin
-   */
-  async delete(discordId: string): Promise<boolean> {
-    try {
-      const result = await this.db.query(
-        `DELETE FROM admins WHERE discord_id = $1`,
-        [discordId]
-      );
-
-      if ((result.rowCount ?? 0) > 0) {
-        logger.info("Admin deleted:", discordId);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      logger.error("Failed to delete admin:", error);
       throw error;
     }
   }

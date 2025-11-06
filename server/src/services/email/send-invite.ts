@@ -56,7 +56,15 @@ function generateInviteEmail(discordName: string, token: string): string {
  * Sends an invite email to a waitlist user by their ID
  */
 export async function sendInviteById(id: number): Promise<InviteResult> {
-  const logoPath = path.join(__dirname, "..", "routes", "assets", "logo.png");
+  const logoPath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "app",
+    "routes",
+    "assets",
+    "logo.png"
+  );
 
   try {
     const entry = await waitlistQueries.findById(id);
