@@ -1,6 +1,7 @@
 import pg from "pg";
-import logger from "../logger/";
-import config from "../config";
+import logger from "@/logger";
+import config from "@/config";
+import { AdminQueries, WaitlistQueries, CompanyQueries } from "./queries";
 
 /**
  * PostgreSQL database pool instance using environment variables.
@@ -16,7 +17,7 @@ import config from "../config";
  * - idleTimeoutMillis: 30000 (30 seconds)
  * - connectionTimeoutMillis: 10000 (10 seconds)
  */
-const { IDLE_TIMEOUT_MS, CONNECTION_TIMEOUT_MS } = config.DatabaseConfig;
+const { IDLE_TIMEOUT_MS, CONNECTION_TIMEOUT_MS } = config.Database;
 
 const db = new pg.Pool({
   user: process.env.DB_USER,
@@ -37,5 +38,9 @@ const db = new pg.Pool({
     process.exit(1);
   }
 })();
+
+export const waitlistQueries = new WaitlistQueries(db);
+export const adminQueries = new AdminQueries(db);
+export const companyQueries = new CompanyQueries(db);
 
 export default db;

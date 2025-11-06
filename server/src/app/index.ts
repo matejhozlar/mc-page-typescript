@@ -1,19 +1,13 @@
-import { fileURLToPath } from "node:url";
-import path from "node:path";
-import express, { urlencoded, type Express } from "express";
+import express, { type Express } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
-import { runInDevelopment } from "../config/guard/run-guard";
-import config from "../config";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const CLIENT_DIST = path.join(__dirname, "..", "..", "..", "client", "dist");
+import { runInDevelopment } from "@/config/guard/run-guard";
+import config from "@/config";
 
 const limiter = rateLimit({
-  windowMs: config.RateLimitConfig.WINDOW_MS,
-  max: config.RateLimitConfig.MAX,
+  windowMs: config.RateLimit.WINDOW_MS,
+  max: config.RateLimit.MAX,
 });
 
 /**
@@ -34,7 +28,7 @@ export function createApp(): Express {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser(process.env.COOKIE_SECRET));
-  app.use(express.static(CLIENT_DIST));
+  app.use(express.static(config.Paths.CLIENT_DIST));
 
   runInDevelopment(() => {
     app.use(cors({ origin: true, credentials: true }));

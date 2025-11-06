@@ -2,9 +2,9 @@ import path from "node:path";
 import fs from "node:fs";
 import util from "node:util";
 import winston from "winston";
-import config from "../config";
+import config from "@/config";
 
-const logDir = config.LoggerConfig.LOG_DIR;
+const logDir = config.Logger.LOG_DIR;
 const SPLAT = Symbol.for("splat");
 
 class DailyFolderLogger {
@@ -59,8 +59,10 @@ class DailyFolderLogger {
       })
     );
 
+    const isDev = process.env.NODE_ENV !== "production";
+
     return winston.createLogger({
-      level: "info",
+      level: isDev ? "debug" : "info",
       format: baseFormat,
       transports: [
         new winston.transports.File({
@@ -71,7 +73,17 @@ class DailyFolderLogger {
           filename: this.getLogPathForDate(date, "errors.log"),
           level: "error",
         }),
-        new winston.transports.Console(),
+        ...(isDev
+          ? [
+              new winston.transports.File({
+                filename: this.getLogPathForDate(date, "debug.log"),
+                level: "debug",
+              }),
+            ]
+          : []),
+        new winston.transports.Console({
+          level: isDev ? "debug" : "info",
+        }),
       ],
       exceptionHandlers: [
         new winston.transports.File({
@@ -116,9 +128,13 @@ class DailyFolderLogger {
         this.logger.close();
         this.currentDate = newDate;
         this.logger = this.createLoggerForDate(this.currentDate);
-        this.cleanOldLogFolders(config.LoggerConfig.KEEP_DAYS);
+        this.cleanOldLogFolders(config.Logger.KEEP_DAYS);
       }
     }, 60 * 1000);
+  }
+
+  public debug(...args: unknown[]): void {
+    (this.logger as any).debug(...args);
   }
 
   public error(...args: unknown[]): void {
@@ -135,6 +151,14 @@ class DailyFolderLogger {
 
   public log(level: string, ...args: unknown[]): void {
     (this.logger as any).log(level, ...args);
+  }
+
+  public close(): void {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+    this.logger.close();
   }
 }
 
