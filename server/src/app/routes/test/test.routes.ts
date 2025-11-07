@@ -1,28 +1,14 @@
-import Router, { type Request, Response } from "express";
-import logger from "@/logger";
+import { Router } from "express";
+import type { AppDependencies } from "@/types/app/routes/dependencies";
+import { asyncHandler } from "@/app/middleware/async-handler";
+import { createTestController } from "./test.controller";
 
-const router = Router();
+export function createTestRoutes(deps: AppDependencies): Router {
+  const router = Router();
+  const controller = createTestController(deps);
 
-interface TestRouteResponse {
-  timestamp: string;
-  msg: string;
+  router.get("/test", asyncHandler(controller.getTest));
+  router.get("/db-test", asyncHandler(controller.getDbTest));
+
+  return router;
 }
-
-/**
- * Test route
- */
-router.get("/test", async (req: Request, res: Response) => {
-  try {
-    const responseData: TestRouteResponse = {
-      timestamp: new Date().toISOString(),
-      msg: "Hello from the test route",
-    };
-
-    return res.json(responseData);
-  } catch (error) {
-    logger.error("Error in test route:", error);
-    res.status(500).json({ error: error });
-  }
-});
-
-export default router;

@@ -6,19 +6,11 @@ validateEnv();
 
 import http from "node:http";
 import { createApp } from "./app";
-import registerRoutes from "./app/routes";
 import logger from "@/logger";
 
 const PORT = process.env.PORT;
 
 const app = createApp();
-
-try {
-  registerRoutes(app);
-  logger.info("Routes registered");
-} catch (error) {
-  logger.error("Failed to register routes:", error);
-}
 
 const httpServer = http.createServer(app);
 
