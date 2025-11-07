@@ -9,6 +9,7 @@ src/stats
 src/tmp
 src/uploads
 src/scripts/users/data/
+src/scripts/db/out
 logs
 dist
 

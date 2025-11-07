@@ -1,0 +1,24 @@
+{
+  "name": "mc-page-typescript",
+  "version": "1.0.0",
+  "description": "![Node.js](https://img.shields.io/badge/Node.js-22-green?logo=node.js&logoColor=white)\r ![React](https://img.shields.io/badge/React-19-blue?logo=react)\r ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-DB-336791?logo=postgresql)\r ![Discord](https://img.shields.io/badge/Discord-Integration-7289da?logo=discord&logoColor=white)\r ![Minecraft](https://img.shields.io/badge/Minecraft-Server-5E7C16?logo=minecraft&logoColor=white)\r ![Vite](https://img.shields.io/badge/Vite-Frontend-646CFF?logo=vite&logoColor=white)",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "extract-schema": "node scripts/extract-table-schema.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matejhozlar/mc-page-typescript.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/matejhozlar/mc-page-typescript/issues"
+  },
+  "homepage": "https://github.com/matejhozlar/mc-page-typescript#readme"
+}

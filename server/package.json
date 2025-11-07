@@ -12,6 +12,7 @@
     "env-gen": "node src/scripts/env/env-gen.js",
     "env-find": "node src/scripts/env/env-find.js",
     "import-find": "node src/scripts/dependency/import-find.js",
+    "schema": "node src/scripts/db/get-table-info.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:unit": "vitest run --dir src/tests/unit",
@@ -39,6 +40,7 @@
     "openai": "^6.8.1",
     "pg": "^8.16.3",
     "process": "^0.11.10",
+    "rcon-client": "^4.2.5",
     "uuid": "^13.0.0",
     "winston": "^3.18.3",
     "zod": "^4.1.12"
