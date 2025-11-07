@@ -29,6 +29,6 @@ export function validateEnv(
     logger.error("Environment validation failed. Exiting");
     process.exit(1);
   } else {
-    logger.info("all required environment variables are set");
+    logger.info("All required environment variables are set");
   }
 }

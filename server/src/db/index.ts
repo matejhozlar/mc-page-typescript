@@ -1,6 +1,7 @@
 import pg from "pg";
 import logger from "@/logger";
 import config from "@/config";
+import { UserQueries } from "./queries";
 
 /**
  * PostgreSQL database pool instance using environment variables
@@ -22,7 +23,7 @@ const db = new pg.Pool({
   connectionTimeoutMillis: config.db.pool.connectionTimeoutMillis,
 });
 
-async () => {
+(async () => {
   try {
     await db.query("SELECT 1");
     logger.info("Connected to PostgreSQL database");
@@ -30,6 +31,8 @@ async () => {
     logger.error("Failed to connect to DB:", error);
     process.exit(1);
   }
-};
+})();
+
+export const userQueries = new UserQueries(db);
 
 export default db;

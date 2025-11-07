@@ -11,7 +11,14 @@
     "structure": "node generate-structure.js",
     "env-gen": "node src/scripts/env/env-gen.js",
     "env-find": "node src/scripts/env/env-find.js",
-    "import-find": "node src/scripts/dependency/import-find.js"
+    "import-find": "node src/scripts/dependency/import-find.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run --dir src/tests/unit",
+    "test:queries": "vitest run src/tests/units/db/queries tests/integration/db/queries",
+    "test:queries:unit": "vitest run src/tests/unit/db/queries",
+    "test:queries:integration": "vitest run src/tests/integration/db/queries",
+    "test:coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",
@@ -45,7 +52,9 @@
     "@types/node": "^24.9.1",
     "@types/nodemailer": "^7.0.3",
     "@types/pg": "^8.15.5",
+    "@vitest/coverage-v8": "^4.0.8",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.8"
   }
 }

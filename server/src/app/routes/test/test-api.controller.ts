@@ -1,12 +1,12 @@
 import type { Request, Response } from "express";
-import type { AppDependencies } from "@/types/app/routes/dependencies";
+import { userQueries } from "@/db";
 
 interface TestRouteResponse {
   timestamp: string;
   msg: string;
 }
 
-export function createTestController(deps: AppDependencies) {
+export function createTestController() {
   return {
     async getTest(req: Request, res: Response): Promise<void> {
       const responseData: TestRouteResponse = {
@@ -18,11 +18,11 @@ export function createTestController(deps: AppDependencies) {
     },
 
     async getDbTest(req: Request, res: Response): Promise<void> {
-      const users = await deps.db.query("SELECT COUNT(*) FROM users");
+      const count: number = await userQueries.getCount();
 
       res.json({
         timestamp: new Date().toISOString(),
-        userCount: users.rows[0].count,
+        userCount: count,
       });
     },
   };

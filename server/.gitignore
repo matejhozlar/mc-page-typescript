@@ -1,5 +1,7 @@
 /node_modules
 .env
+.env.test.local
+.env.test
 src/services/.env
 src/logs/
 src/services/logs/
@@ -8,6 +10,7 @@ src/tmp
 src/uploads
 src/scripts/users/data/
 logs
+dist
 
 # assets
 src/services/assets

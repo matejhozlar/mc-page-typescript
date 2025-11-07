@@ -6,11 +6,12 @@ validateEnv();
 
 import http from "node:http";
 import { createApp } from "./app";
+import db from "./db";
 import logger from "@/logger";
 
 const PORT = process.env.PORT;
 
-const app = createApp();
+const app = createApp({ db });
 
 const httpServer = http.createServer(app);
 
