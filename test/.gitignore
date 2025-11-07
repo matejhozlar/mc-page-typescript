@@ -7,7 +7,6 @@ src/stats
 src/tmp
 src/uploads
 src/scripts/users/data/
-logs
 
 # assets
 src/services/assets

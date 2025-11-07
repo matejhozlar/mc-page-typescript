@@ -144,4 +144,35 @@ export class TicketQueries {
       throw error;
     }
   }
+
+  /**
+   * Insert ticket into DB
+   *
+   * @param {TicketCreateParams} params - Ticket creation parameters
+   * @returns The newly created ticket
+   */
+  async create(params: TicketCreateParams): Promise<Ticket> {
+    try {
+      const result = await this.db.query<Ticket>(
+        `INSERT INTO tickets (ticket_number, discord_id, mc_name, channel_id)
+         VALUES ($1, $2, $3, $4)
+         RETURNING *`,
+        [
+          params.ticket_number,
+          params.discord_id,
+          params.mc_name || null,
+          params.channel_id,
+        ]
+      );
+
+      if (result.rowCount !== 1) {
+        throw new Error("Failed to insert ticket into database");
+      }
+
+      return result.rows[0];
+    } catch (error) {
+      logger.error("Failed to create ticket:", error);
+      throw error;
+    }
+  }
 }

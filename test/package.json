@@ -5,8 +5,8 @@
   "main": "server.ts",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc && node fix-imports.js",
-    "start": "node dist/server.js",
+    "build": "tsc",
+    "start": "node server/server.js",
     "typecheck": "tsc --noEmit",
     "structure": "node generate-structure.js",
     "env-gen": "node src/scripts/env/env-gen.js",

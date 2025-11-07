@@ -2,16 +2,23 @@ import express, { type Express } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
-import { runInDevelopment } from "@/utils/guard/run-guard";
+import { runInDevelopment } from "@/config/guard/run-guard";
 import config from "@/config";
 
 const limiter = rateLimit({
-  windowMs: config.api.rateLimit.windowMs,
-  max: config.api.rateLimit.max,
+  windowMs: config.RateLimit.WINDOW_MS,
+  max: config.RateLimit.MAX,
 });
 
 /**
- * Initializes and configures an Express application
+ * Initializes and configures an Express application.
+ *
+ * Middleware included:
+ * - JSON body parsing
+ * - CORS (enabled only in development)
+ * - URL-encoded body parsing
+ * - Cookie parsing
+ * - Static file serving for the React frontend
  */
 export function createApp(): Express {
   const app = express();
@@ -21,7 +28,7 @@ export function createApp(): Express {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser(process.env.COOKIE_SECRET));
-  app.use(express.static(config.paths.clientDist));
+  app.use(express.static(config.Paths.CLIENT_DIST));
 
   runInDevelopment(() => {
     app.use(cors({ origin: true, credentials: true }));
