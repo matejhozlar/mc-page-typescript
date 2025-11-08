@@ -12,12 +12,17 @@ import { createTransporter } from "./transporter";
 import type {
   WaitlistSubmission,
   AutoInviteResult,
-} from "@/types/services/waitlist";
+  InviteResult,
+} from "@/types/models/waitlist.types";
+import { isSendableChannel } from "@/discord/utils/channel-guard";
+import { createAdminPanelLink } from "./utils/button.utils";
 
-const { LIME_GREEN } = config.Colors;
+const { LIME_GREEN } = config.colors;
 
 /**
  * Sends an email notification to the admin about new waitlist submissions
+ *
+ * @param submission - The waitlist submission details
  */
 async function sendAdminEmail(submission: WaitlistSubmission): Promise<void> {
   const { id, email, discord_name } = submission;
@@ -48,7 +53,11 @@ async function sendAdminEmail(submission: WaitlistSubmission): Promise<void> {
 }
 
 /**
- * Creates an embed for waitlist notifications
+ * Creates and embed for waitlist notifications
+ *
+ * @param submission - The waitlist submission details
+ * @param color - Color used for embed
+ * @returns Embed
  */
 function createWaitlistEmbed(
   submission: WaitlistSubmission,
@@ -60,7 +69,7 @@ function createWaitlistEmbed(
     .setTitle("📥 New Waitlist Submission")
     .addFields(
       { name: "Submission ID", value: id.toString(), inline: false },
-      { name: "Discord", value: discord_name, inline: false },
+      { name: "Discord", value: discord_name ?? "Unknown", inline: false },
       { name: "Email", value: email, inline: false }
     )
     .setColor(color)
@@ -68,7 +77,10 @@ function createWaitlistEmbed(
 }
 
 /**
- * Creates action row with Accept/Decline buttons
+ * Creates action row with Accept/Declines buttons
+ *
+ * @param submissionId - ID of the submission
+ * @returns ActionRow with buttons
  */
 function createActionButtons(
   submissionId: number
@@ -86,19 +98,11 @@ function createActionButtons(
 }
 
 /**
- * Creates action row with Admin Panel link
- */
-function createAdminPanelLink(): ActionRowBuilder<ButtonBuilder> {
-  return new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setLabel("Open Admin Panel")
-      .setStyle(ButtonStyle.Link)
-      .setURL(config.Links.ADMIN_PANEL)
-  );
-}
-
-/**
  * Sends a Discord notification to the admin channel
+ *
+ * @param client - The Discord client instance that will send the notification
+ * @param submission - The waitlist submission details
+ * @param includeActionButtons - (Optional) Whether to include action row buttons
  */
 async function sendDiscordNotification(
   client: Client,
@@ -111,11 +115,6 @@ async function sendDiscordNotification(
       process.env.DISCORD_ADMIN_CHAT_CHANNEL_ID
     );
 
-    if (!channel?.isTextBased()) {
-      logger.warn("Admin channel not text-based or not found.");
-      return;
-    }
-
     const embed = createWaitlistEmbed(submission);
     const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
@@ -124,22 +123,24 @@ async function sendDiscordNotification(
     }
     components.push(createAdminPanelLink());
 
-    await (channel as TextChannel).send({ embeds: [embed], components });
+    if (isSendableChannel(channel)) {
+      await channel.send({ embeds: [embed], components });
+    }
     logger.info(
-      `Discord admin channel notified of waitlist:`,
+      "Discord admin channel notified of waitlist:",
       submission.email
     );
   } catch (error) {
-    logger.error("Failed to send Discord notification", error);
+    logger.error("Failed to send Discord notification:", error);
     throw error;
   }
 }
 
 /**
- * Notifies the admin via email and Discord about a new waitlist submission.
+ * Notifies the admin via email and Discord about new waitlist submission
  *
  * @param submission - The waitlist submission details
- * @param client - The Discord.js client instance
+ * @param client - The Discord bot instance
  */
 export async function notifyAdminWaitlist(
   submission: WaitlistSubmission,
@@ -153,12 +154,12 @@ export async function notifyAdminWaitlist(
 }
 
 /**
- * Auto-sends an invite to the user and notifies admins via a Discord embed
- * without Accept/Decline buttons—only an Admin Panel link. The embed states
- * that the user was auto-invited.
+ * Auto-sends an invite to the user and notifies admins via Discord embed
+ * without Accept/Decline buttons-only an Admin Panel link. The embed states
+ * that the user was auto-invited
  *
  * @param submission - Waitlist submission details
- * @param client - Discord.js client instance
+ * @param client - The Discord client instance
  * @returns Result of the auto-invite operation
  */
 export async function autoInviteAndNotify(
@@ -167,21 +168,7 @@ export async function autoInviteAndNotify(
 ): Promise<AutoInviteResult> {
   const { id, discord_name } = submission;
 
-  let inviteResult: AutoInviteResult;
-  try {
-    const result = await sendInviteById(id);
-    inviteResult = {
-      ok: result.ok,
-      msg: result.msg,
-      token: result.token,
-    };
-  } catch (error) {
-    logger.error("Auto-invite failed:", error);
-    inviteResult = {
-      ok: false,
-      msg: error instanceof Error ? error.message : "Auto-invite error",
-    };
-  }
+  const inviteResult: InviteResult = await sendInviteById(id);
 
   try {
     const guild = await client.guilds.fetch(process.env.DISCORD_GUILD_ID);
@@ -189,9 +176,7 @@ export async function autoInviteAndNotify(
       process.env.DISCORD_ADMIN_CHAT_CHANNEL_ID
     );
 
-    if (!channel?.isTextBased()) {
-      logger.warn("Admin channel not text-based or not found");
-    } else {
+    if (isSendableChannel(channel)) {
       const success = inviteResult.ok;
       const botMention =
         guild.members.me?.toString() || `<@${client.user?.id}>`;
@@ -200,7 +185,7 @@ export async function autoInviteAndNotify(
 
       const components = [createAdminPanelLink()];
 
-      await (channel as TextChannel).send({
+      await channel.send({
         content: success
           ? `✅ Accepted by ${botMention}`
           : "⚠️ Auto-invite attempted — please review.",
@@ -213,7 +198,7 @@ export async function autoInviteAndNotify(
       );
     }
   } catch (error) {
-    logger.error("Failed to send Discord auto-invite notification:", error);
+    logger.error("Failed to send Discord auto-invite notificaton:", error);
   }
 
   return inviteResult;

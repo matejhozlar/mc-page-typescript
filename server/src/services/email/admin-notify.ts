@@ -14,14 +14,19 @@ import type {
   PendingShopNotification,
   ShopEditNotification,
   AdminNoticeParams,
-} from "@/types/services/admin-notify";
+} from "@/types/services/notification.types";
+import { createAdminPanelLink } from "./utils/button.utils";
+import { isSendableChannel } from "@/discord/utils/channel-guard";
 
-const { BLUE } = config.Colors;
+const { BLUE } = config.colors;
 
 /**
  * Escapes HTML special characters
+ *
+ * @param str - The string to parse
+ * @returns Parsed string
  */
-function escapeHtml(str = ""): string {
+function escapeHtml(str: string = ""): string {
   return String(str)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -31,35 +36,24 @@ function escapeHtml(str = ""): string {
 }
 
 /**
- * Creates the admin panel button row
- */
-function createAdminPanelButton(): ActionRowBuilder<ButtonBuilder> {
-  return new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setLabel("Open Admin Panel")
-      .setStyle(ButtonStyle.Link)
-      .setURL(config.Links.ADMIN_PANEL)
-  );
-}
-
-/**
  * Sends both email and Discord notification to admins
+ *
+ * @param params - The admin notice details
  */
 async function sendAdminNotice(params: AdminNoticeParams): Promise<void> {
   const { subject, plain, html, embed, client } = params;
-
   try {
-    const trasporter = createTransporter();
+    const transporter = createTransporter();
     const mailOptions = {
-      from: `"Createrington" <${config.Maintainer.EMAIL}>`,
+      from: `"Createrington" <${config.maintainer.email}>`,
       to: process.env.NOTIFY_ADMIN_EMAIL,
       subject,
       text: plain,
       html,
     };
 
-    await trasporter.sendMail(mailOptions);
-    logger.info(`Admin email sent: ${subject}`);
+    await transporter.sendMail(mailOptions);
+    logger.info("Admin email sent:", subject);
   } catch (error) {
     logger.error("Failed to send admin email:", error);
   }
@@ -70,22 +64,21 @@ async function sendAdminNotice(params: AdminNoticeParams): Promise<void> {
       process.env.DISCORD_ADMIN_CHAT_CHANNEL_ID
     );
 
-    if (!channel?.isTextBased()) {
-      logger.warn("Admin channel not text-based or not found.");
-      return;
+    if (isSendableChannel(channel)) {
+      await channel.send(embed);
     }
-
-    await (channel as TextChannel).send(embed);
     logger.info("Discord admin channel notified:", subject);
   } catch (error) {
-    logger.error("Failed to send Discord notification:", error);
+    logger.error("Failed to send Discord notificaton", error);
   }
 }
 
 /**
  * Notify admins that a NEW company was submitted and awaits approval
+ *
+ * @param data - The pending company notification details
+ * @param client - The Discord client instance
  */
-
 export async function notifyAdminPendingCompany(
   data: PendingCompanyNotification,
   client: Client
@@ -98,7 +91,7 @@ export async function notifyAdminPendingCompany(
     `A new company is awaiting approval:`,
     `ID: ${id}`,
     `Name: ${name}`,
-    `Founder UUID: ${founder_uuid}`,
+    `Founder UUID: ${founder_uuid || "Uknown"}`,
     short_description ? `Short Description: ${short_description}` : null,
   ]
     .filter(Boolean)
@@ -109,7 +102,7 @@ export async function notifyAdminPendingCompany(
     <ul>
       <li><strong>ID:</strong> ${id}</li>
       <li><strong>Name:</strong> ${escapeHtml(name)}</li>
-      <li><strong>Founder UUID:</strong> ${founder_uuid}</li>
+      <li><strong>Founder UUID:</strong> ${founder_uuid || "Unknown"}</li>
       ${
         short_description
           ? `<li><strong>Short Description:</strong> ${escapeHtml(
@@ -139,14 +132,17 @@ export async function notifyAdminPendingCompany(
     .setColor(BLUE)
     .setTimestamp();
 
-  const row = createAdminPanelButton();
+  const row = createAdminPanelLink();
   const embed = { embeds: [embedBuilder], components: [row] };
 
   await sendAdminNotice({ subject, plain, html, embed, client });
 }
 
 /**
- * Notify admins that a COMPANY EDIT request was submitted and awaits approval.
+ * Notifies admins that a COMPANY EDIT request was submitted and awaits approval
+ *
+ * @param data - The company edit notification details
+ * @param client - The Discord client instance
  */
 export async function notifyAdminCompanyEdit(
   data: CompanyEditNotification,
@@ -208,14 +204,17 @@ export async function notifyAdminCompanyEdit(
     .setColor(BLUE)
     .setTimestamp();
 
-  const row = createAdminPanelButton();
+  const row = createAdminPanelLink();
   const embed = { embeds: [embedBuilder], components: [row] };
 
   await sendAdminNotice({ subject, plain, html, embed, client });
 }
 
 /**
- * Notify admins that a NEW shop was submitted and awaits approval.
+ * Notify admins that a NEW SHOP was submitted and awaits approval
+ *
+ * @param data - The pending shop notification details
+ * @param client - The Discord client instance
  */
 export async function notifyAdminPendingShop(
   data: PendingShopNotification,
@@ -238,7 +237,7 @@ export async function notifyAdminPendingShop(
     `Shop Name: ${name}`,
     `Company ID: ${company_id}`,
     company_name ? `Company Name: ${company_name}` : null,
-    `Founder UUID: ${founder_uuid}`,
+    `Founder UUID: ${founder_uuid || "Unknown"}`,
     short_description ? `Short Description: ${short_description}` : null,
   ]
     .filter(Boolean)
@@ -257,7 +256,7 @@ export async function notifyAdminPendingShop(
             )}</li>`
           : ""
       }
-      <li><strong>Founder UUID:</strong> ${founder_uuid}</li>
+      <li><strong>Founder UUID:</strong> ${founder_uuid || "Unknown"}</li>
       ${
         short_description
           ? `<li><strong>Short Description:</strong> ${escapeHtml(
@@ -291,14 +290,17 @@ export async function notifyAdminPendingShop(
     .setColor(BLUE)
     .setTimestamp();
 
-  const row = createAdminPanelButton();
+  const row = createAdminPanelLink();
   const embed = { embeds: [embedBuilder], components: [row] };
 
   await sendAdminNotice({ subject, plain, html, embed, client });
 }
 
 /**
- * Notify admins that a NEW shop edit was submitted and awaits approval.
+ * Notify admins that a NEW shop edit was submitted and awaits approval
+ *
+ * @param data - The shop edit notification details
+ * @param client - The Discord client instance
  */
 export async function notifyAdminShopEdit(
   data: ShopEditNotification,
@@ -364,7 +366,7 @@ export async function notifyAdminShopEdit(
     .setColor(BLUE)
     .setTimestamp();
 
-  const row = createAdminPanelButton();
+  const row = createAdminPanelLink();
   const embed = { embeds: [embedBuilder], components: [row] };
 
   await sendAdminNotice({ subject, plain, html, embed, client });

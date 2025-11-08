@@ -14,7 +14,7 @@ export class UserQueries {
       const result = await this.db.query(`SELECT COUNT(*) FROM users`);
 
       if (!result.rows[0].count) {
-        throw new Error("No data returned");
+        throw new Error("No data found");
       }
 
       return result.rows[0].count;

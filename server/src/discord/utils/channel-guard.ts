@@ -23,7 +23,7 @@ export type SendableChannel =
  * Type guard to check if a channel supports sending messages
  *
  * @param channel - The channel to check
- * @param returns True if the channel has a send method
+ * @returns True if the channel has a send method
  */
 export function isSendableChannel(
   channel: Channel | null
@@ -73,6 +73,6 @@ export function isThreadChannel(
  * @param channel - The channel to check
  * @returns True if the channel is a DMChannel
  */
-export function isDMCHannel(channel: Channel | null): channel is DMChannel {
+export function isDMChannel(channel: Channel | null): channel is DMChannel {
   return channel !== null && channel.isDMBased();
 }

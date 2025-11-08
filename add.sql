@@ -81,6 +81,41 @@ REFERENCES users(uuid)
 ON DELETE CASCADE
 ON UPDATE CASCADE;
 
+ALTER TABLE rcon_logs
+ADD CONSTRAINT fk_rcon_logs_discord_id
+FOREIGN KEY (discord_id)
+REFERENCES users(discord_id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE tickets
+ADD CONSTRAINT fk_tickets_discord_id
+FOREIGN KEY (discord_id)
+REFERENCES users(discord_id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE token_price_alerts
+ADD CONSTRAINT fk_token_price_alerts_discord_id
+FOREIGN KEY (discord_id)
+REFERENCES users(discord_id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE token_price_alerts
+ADD CONSTRAINT fk_token_price_alerts_token_symbol
+FOREIGN KEY (token_symbol)
+REFERENCES crypto_tokens(symbol)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE user_portfolio_history
+ADD CONSTRAINT fk_user_portfolio_history_discord_id
+FOREIGN KEY (discord_id)
+REFERENCES users(discord_id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
 ALTER TABLE ai_message_log ALTER COLUMN created_at SET NOT NULL;
 ALTER TABLE admins ALTER COLUMN created_at SET NOT NULL;
 ALTER TABLE users ALTER COLUMN first_joined SET NOT NULL;
