@@ -34,7 +34,13 @@ export async function loadCommandHandlers(): Promise<
 
   const isDev = process.env.NODE_ENV !== "production";
 
-  const commandsPath = path.join(__dirname, "..", "../commands");
+  const commandsPath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "interactions",
+    "slash-commands"
+  );
   const commandFiles = fs
     .readdirSync(commandsPath)
     .filter((file) => file.endsWith(".ts"));

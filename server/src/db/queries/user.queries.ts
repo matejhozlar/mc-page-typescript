@@ -5,6 +5,24 @@ export class UserQueries {
   constructor(private db: Pool) {}
 
   /**
+   * Get Minecraft username based on Discord ID
+   *
+   * @param discordId - The Discord ID to look for
+   */
+  async getNameByDiscordId(discordId: string): Promise<string> {
+    const result = await this.db.query<{ name: string }>(
+      `SELECT name FROM users WHERE discord_id = $1`,
+      [discordId]
+    );
+
+    if (result.rowCount === 0) {
+      throw new Error("User not found");
+    }
+
+    return result.rows[0].name;
+  }
+
+  /**
    * Get number of users in DB
    *
    * @returns Number of users

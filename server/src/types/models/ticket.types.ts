@@ -7,10 +7,20 @@ export interface Ticket {
   ticket_number: number;
   /** Foreign key to users table */
   discord_id: string;
-  mc_name: string | null;
+  /** Foreign key to users table */
+  mc_name: string;
   channel_id: string;
   status: string | null;
   created_at: Date | null;
   updated_at: Date | null;
   admin_message_id: string | null;
+}
+
+export interface TicketCreateParams {
+  ticket_number: number;
+  /** Foreign key to users table */
+  discord_id: string;
+  /** Foreign key to users table */
+  mc_name: string;
+  channel_id: string;
 }

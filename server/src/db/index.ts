@@ -1,7 +1,12 @@
 import pg from "pg";
 import logger from "@/logger";
 import config from "@/config";
-import { UserQueries, WaitlistQueries, AdminQueries } from "./queries";
+import {
+  UserQueries,
+  WaitlistQueries,
+  AdminQueries,
+  TicketQueries,
+} from "./queries";
 
 /**
  * PostgreSQL database pool instance using environment variables
@@ -36,5 +41,6 @@ const db = new pg.Pool({
 export const userQueries = new UserQueries(db);
 export const waitlistQueries = new WaitlistQueries(db);
 export const adminQueries = new AdminQueries(db);
+export const ticketQueries = new TicketQueries(db);
 
 export default db;
