@@ -1,4 +1,4 @@
-const rotatingStatuses: readonly string[] = [
+const rotatingStatuses: string[] = [
   "🌐 create-rington.com",
   "📊 Fetching dashboard...",
   "📊 Dashboard: Active",

@@ -41,4 +41,21 @@ export class UserQueries {
       throw error;
     }
   }
+
+  /**
+   * Checks if the user exists in the database
+   *
+   * @param discordId - The Discord ID to look for
+   * @returns True if the user exists, otherwise false
+   */
+  async existsByDiscordId(discordId: string): Promise<boolean> {
+    const result = await this.db.query(
+      `SELECT EXISTS(
+        SELECT 1 FROM users WHERE discord_id = $1 
+      )`,
+      [discordId]
+    );
+
+    return Boolean(result.rows[0]?.exists);
+  }
 }

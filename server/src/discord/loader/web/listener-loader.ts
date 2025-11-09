@@ -15,7 +15,7 @@ export interface WebListenerDependencies {
  */
 export interface WebListenerModule {
   default: (
-    client: Client,
+    webBot: Client,
     deps: WebListenerDependencies
   ) => void | Promise<void>;
 }
@@ -23,11 +23,11 @@ export interface WebListenerModule {
 /**
  * Dynamically loads and registers all web event listeners from discord/listeners/web folder
  *
- * @param client - The Discord client instance to registers listeners on
+ * @param webBot - The Discord client instance to registers listeners on
  * @param deps - Dependencies to pass to each listener
  */
 export async function registerWebListeners(
-  client: Client,
+  webBot: Client,
   deps: WebListenerDependencies = {}
 ): Promise<void> {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -41,7 +41,7 @@ export async function registerWebListeners(
     )) as WebListenerModule;
 
     if (typeof module.default === "function") {
-      await module.default(client, deps);
+      await module.default(webBot, deps);
     }
   }
 }

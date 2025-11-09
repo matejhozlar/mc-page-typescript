@@ -6,6 +6,8 @@ import {
   WaitlistQueries,
   AdminQueries,
   TicketQueries,
+  AiMessageLogQueries,
+  ChatTokenQueries,
 } from "./queries";
 
 /**
@@ -42,5 +44,7 @@ export const userQueries = new UserQueries(db);
 export const waitlistQueries = new WaitlistQueries(db);
 export const adminQueries = new AdminQueries(db);
 export const ticketQueries = new TicketQueries(db);
+export const aiMessageLogQueries = new AiMessageLogQueries(db);
+export const chatTokenQueries = new ChatTokenQueries(db);
 
 export default db;

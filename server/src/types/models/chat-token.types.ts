@@ -6,6 +6,6 @@ export interface ChatToken {
   token: string;
   /** Foreign key to users table */
   discord_id: string;
-  discord_name: string | null;
+  discord_name: string;
   expires_at: Date;
 }

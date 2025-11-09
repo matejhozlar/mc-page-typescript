@@ -9,12 +9,12 @@ import { requireProduction } from "@/utils/guard/run-guard";
  * Cycles through a list of custom messages at a specified interval
  * Only runs in production environment
  *
- * @param client - The Discord client instance
+ * @param webBot - The Discord client instance
  * @param statuses - Array of status strings to rotate through
  * @param intervalMs - Rotation interval in milliseconds (default: 60000ms / 1 minute)
  */
 export default function setRotatingStatuses(
-  client: Client,
+  webBot: Client,
   statuses: string[],
   intervalMs: number = 60000
 ): void {
@@ -25,7 +25,7 @@ export default function setRotatingStatuses(
     return;
   }
 
-  if (!client.user) {
+  if (!webBot.user) {
     logger.error("Client user is not initialized");
     return;
   }
@@ -33,14 +33,14 @@ export default function setRotatingStatuses(
   let index = 0;
 
   setInterval(() => {
-    if (!client.user) {
+    if (!webBot.user) {
       logger.error("Client user became unavailable");
       return;
     }
 
     const status = statuses[index++ % statuses.length];
 
-    client.user.setPresence({
+    webBot.user.setPresence({
       activities: [
         {
           type: ActivityType.Custom,

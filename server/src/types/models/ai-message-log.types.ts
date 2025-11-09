@@ -9,3 +9,9 @@ export interface AiMessageLog {
   message: string;
   created_at: Date;
 }
+
+export interface AiMessageLogCreateParams {
+  /** Foreign key to users table */
+  discord_id: string;
+  message: string;
+}

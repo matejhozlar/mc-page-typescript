@@ -11,15 +11,13 @@ export class MockFactory {
     } as any;
   }
 
-  static createMockQueryResult<T extends QueryResultRow>(
-    rows: T[]
-  ): QueryResult<T> {
+  static createMockQueryResult<T>(rows: T[], rowCount: number | null = null) {
     return {
       rows,
+      rowCount: rowCount ?? rows.length,
       command: "SELECT",
-      rowCount: rows.length,
       oid: 0,
       fields: [],
-    } as QueryResult<T>;
+    };
   }
 }

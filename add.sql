@@ -4,6 +4,9 @@ ALTER TABLE ONLY public.users
 ALTER TABLE users 
 ALTER COLUMN discord_id SET NOT NULL;
 
+ALTER TABLE chat_tokens
+ALTER COLUMN discord_name SET NOT NULL;
+
 ALTER TABLE admins
 ADD CONSTRAINT fk_admins_discord_id
 FOREIGN KEY (discord_id)

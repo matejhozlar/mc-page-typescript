@@ -8,6 +8,9 @@ import http from "node:http";
 import { createApp } from "./app";
 import db from "./db";
 import logger from "@/logger";
+import { initIO } from "./socket/io";
+import webBot from "./discord/bots/webBot";
+import { shutdownBot } from "./discord/utils/shut-down";
 
 const PORT = process.env.PORT;
 
@@ -15,20 +18,35 @@ const app = createApp({ db });
 
 const httpServer = http.createServer(app);
 
+const io = initIO(httpServer);
+
 httpServer.listen(PORT, () => {
   logger.info(`Server running at http://localhost:${PORT}`);
 });
 
-function shutDown(code: number = 0) {
-  logger.info("Shutting down...");
-  httpServer.close(() => {
-    logger.info("HTTP Server closed");
-    process.exit(code);
-  });
-}
+process.on("SIGINT", async () => {
+  logger.info("Gracefully shutting down...");
 
-process.on("SIGINT", () => shutDown(0));
-process.on("SIGTERM", () => shutDown(0));
+  try {
+    await shutdownBot(webBot, {
+      notify: true,
+      name: "WebBot",
+      message: "🔴 WebBot is going offline",
+    });
+
+    io.close();
+
+    await db.end();
+
+    httpServer.close(() => {
+      logger.info("Server closed. Exiting...");
+      process.exit(0);
+    });
+  } catch (error) {
+    logger.error("Error during shutdown:", error);
+    process.exit(1);
+  }
+});
 
 process.on("unhandledRejection", (reason) => {
   logger.error("Unhandled promise rejection:", reason);
