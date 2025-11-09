@@ -17,9 +17,7 @@ const {
 } = process.env;
 
 if (!CLIENT_BOT_TOKEN || !publishChannel || !ticketChannelId) {
-  console.error(
-    "Missing one or more env vars: CLIENT_BOT_TOKEN, DISCORD_ANNOUNCEMENT_CHANNEL_ID, DISCORD_TICKET_MESSAGE_CHANNEL_ID."
-  );
+  console.error("Missing one or more env vars");
   process.exit(1);
 }
 
