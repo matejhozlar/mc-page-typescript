@@ -6,10 +6,10 @@ export class TicketQueries {
   constructor(private db: Pool) {}
 
   /**
-   * Finds an open ticket for user by his Discord ID
+   * Retrieves the first open (non-deleted) ticket associated with a Discord user
    *
-   * @param discordId - The Discord ID to look for
-   * @returns The existing ticket or null
+   * @param discordId - The Discord user ID to search for
+   * @returns Promise resolving to the user's open ticket if found, null otherwise
    */
   async findOpenByDiscordId(discordId: string): Promise<Ticket | null> {
     const result = await this.db.query<Ticket>(
@@ -21,10 +21,10 @@ export class TicketQueries {
   }
 
   /**
-   * Finds a ticket by channel ID
+   * Retrieves a ticket by its associated Discord channel identifier
    *
-   * @param channelId - The Discord ID to look for
-   * @returns The ticket or null if not found
+   * @param channelId - The Discord channel ID to search for
+   * @returns Promise resolving to the ticket if found, null otherwise
    */
   async findByChannelId(channelId: string): Promise<Ticket | null> {
     const result = await this.db.query<Ticket>(
@@ -36,10 +36,12 @@ export class TicketQueries {
   }
 
   /**
-   * Updates the admin panel message ID for a ticket
+   * Updates the admin panel message ID reference for a specific ticket
    *
-   * @param channelId - Discord channel ID
-   * @param adminMessageId - Admin panel message ID
+   * @param channelId - The Discord channel Id of the ticket
+   * @param adminMessageId - The message ID of the admin panel in Discord
+   * @returns Promise resolving when the update is complete
+   * @throws Error if the ticket with the specified channel ID is not found
    */
   async updateAdminPanelId(
     channelId: string,
@@ -65,9 +67,10 @@ export class TicketQueries {
   }
 
   /**
-   * Atomically increments and returns the next ticket number
+   * Atomically increments and retrieves the next sequential ticket number from the counter
    *
-   * @returns Next ticket number
+   * @returns Promise resolving to the next available ticket number
+   * @throws Error if the ticket counter update fails
    */
   async getNext(): Promise<number> {
     const result = await this.db.query<{ last_number: number }>(
@@ -86,9 +89,10 @@ export class TicketQueries {
   }
 
   /**
-   * Creates a new ticket, inserts it into DB
+   * Creates and persists a new ticket record in the database
    *
-   * @param params - Ticket creation parameters
+   * @param params - Object containing ticket creation data (ticket_number, discord_id, mc_name, channel_id)
+   * @returns Promise resolving when the ticket is created
    */
   async create(params: TicketCreateParams): Promise<void> {
     await this.db.query(
@@ -104,10 +108,11 @@ export class TicketQueries {
   }
 
   /**
-   * Marks a ticket as deleted
+   * Updates a ticket's status to deleted and recors the timestamp
    *
-   * @param channelId - The Discord channel ID of the ticket
-   * @throws Error if ticket not found
+   * @param channelId - The Discord channel ID of the ticket to delete
+   * @returns Promise resolving when the status is updated
+   * @throws Error if no ticket is found with the specified channel ID
    */
   async markAsDeleted(channelId: string): Promise<void> {
     const result = await this.db.query(
@@ -125,10 +130,11 @@ export class TicketQueries {
   }
 
   /**
-   * Marks a ticket as open
+   * Updates a ticket's status to open and records the timestamp
    *
-   * @param channelId - The Discord channel ID of the ticket
-   * @throws Error if ticket not found
+   * @param channelId - The Discord channel ID of the ticket to reopen
+   * @returns Promise resolving when the status is updated
+   * @throws Error if no ticket is found with the specified channel ID
    */
   async markAsOpen(channelId: string): Promise<void> {
     const result = await this.db.query(

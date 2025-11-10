@@ -6,11 +6,11 @@ export class WaitlistQueries {
   constructor(private db: Pool) {}
 
   /**
-   * Finds a waitlist entry by ID
+   * Retrieves a waitlist entry by its unique identifier
    *
-   * @param id - The ID of the waitlist entry to look for
-   *
-   * @returns The waitlist entry
+   * @param id - The unique identifier of the waitlist entry
+   * @returns Promise resolving to the waitlist entry if found, null otherwise
+   * @throws Error if the database query fails
    */
   async findById(id: number): Promise<Waitlist | null> {
     try {
@@ -30,10 +30,12 @@ export class WaitlistQueries {
   }
 
   /**
-   * Updates the token for a waitlist entry (marks as invited)
+   * Updates the invitation token for a waitlist entry, marking it as invited
    *
-   * @param id - The ID of the waitlist entry to update
-   * @param token - The generated token to assign to the waitlist entry
+   * @param id - The unique identifier of the waitlist entry to update
+   * @param token - The generated invitation token to assign
+   * @returns Promise resolving when the update is complete
+   * @throws Error if no waitlist entry is found with the specified ID or update fails
    */
   async updateToken(id: number, token: string): Promise<void> {
     const result = await this.db.query(

@@ -8,6 +8,9 @@ import {
   TicketQueries,
   AiMessageLogQueries,
   ChatTokenQueries,
+  TokenPriceHistoryQueries,
+  CryptoTokenQueries,
+  TokenPriceAlertQueries,
 } from "./queries";
 
 /**
@@ -46,5 +49,8 @@ export const adminQueries = new AdminQueries(db);
 export const ticketQueries = new TicketQueries(db);
 export const aiMessageLogQueries = new AiMessageLogQueries(db);
 export const chatTokenQueries = new ChatTokenQueries(db);
+export const tokenPriceHistoryQueries = new TokenPriceHistoryQueries(db);
+export const cryptoTokenQueries = new CryptoTokenQueries(db);
+export const tokenPriceAlertQueries = new TokenPriceAlertQueries(db);
 
 export default db;

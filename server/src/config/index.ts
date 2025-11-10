@@ -7,6 +7,7 @@ import colors from "./colors.config";
 import links from "./links.config";
 import services from "./services";
 import discord from "./discord";
+import crypto from "./crypto";
 
 export default {
   api,
@@ -18,4 +19,5 @@ export default {
   links,
   services,
   discord,
+  crypto,
 };

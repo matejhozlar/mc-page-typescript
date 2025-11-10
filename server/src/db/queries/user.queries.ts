@@ -5,9 +5,11 @@ export class UserQueries {
   constructor(private db: Pool) {}
 
   /**
-   * Get Minecraft username based on Discord ID
+   * Retrieves Minecraft username associated with a Discord user ID
    *
-   * @param discordId - The Discord ID to look for
+   * @param discordId - The Discord user ID to search for
+   * @returns Promise resolving to the Minecraft username
+   * @throws Error if no user is found with the specified Discord ID
    */
   async getNameByDiscordId(discordId: string): Promise<string> {
     const result = await this.db.query<{ name: string }>(
@@ -23,9 +25,10 @@ export class UserQueries {
   }
 
   /**
-   * Get number of users in DB
+   * Retrieves the total number of registered users in the database
    *
-   * @returns Number of users
+   * @returns Promise resolving to the count of users
+   * @throws Error if the count query fails or returns no data
    */
   async getCount(): Promise<number> {
     try {
@@ -43,10 +46,10 @@ export class UserQueries {
   }
 
   /**
-   * Checks if the user exists in the database
+   * Checks whether a user with the specified Discord ID exists in the database
    *
-   * @param discordId - The Discord ID to look for
-   * @returns True if the user exists, otherwise false
+   * @param discordId - The Discord ID to check
+   * @returns Promise resolving to true if the user exists, false otherwise
    */
   async existsByDiscordId(discordId: string): Promise<boolean> {
     const result = await this.db.query(

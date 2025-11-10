@@ -8,7 +8,7 @@ export class AdminQueries {
    * Checks if a Discord ID belongs to an admin
    *
    * @param discordId - Discord ID to look for
-   * @returns True if the user is an admin
+   * @returns Promise resolving to true if the Discord ID is an admin, false otherwise
    */
   async isAdmin(discordId: string): Promise<boolean> {
     if (!discordId) return false;

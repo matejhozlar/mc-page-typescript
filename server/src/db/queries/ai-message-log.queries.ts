@@ -6,10 +6,11 @@ export class AiMessageLogQueries {
   constructor(private db: Pool) {}
 
   /**
-   * Gets the count of the AI messages sent by the user today
+   * Retrieves the count of AI messages sent by a specific user to the current date
    *
-   * @param discordId - The Discord ID to look for
-   * @returns Count of messages sent today
+   * @param discordId - The Discord user ID to search for
+   * @returns Promise resolving to the number of messages sent
+   * @throws Error if the database query fails or the user does not exist
    */
   async getToday(discordId: string): Promise<number> {
     const result = await this.db.query<{ count: string }>(
@@ -22,9 +23,10 @@ export class AiMessageLogQueries {
   }
 
   /**
-   * Logs an AI message from a user
+   * Creates and persists a new AI message log entry for a user
    *
-   * @param params - Message log creation parameters
+   * @param params - Object containing Discord ID and message content to log
+   * @returns Promise resolving when the log entry is created
    */
   async create(params: AiMessageLogCreateParams): Promise<void> {
     await this.db.query(
