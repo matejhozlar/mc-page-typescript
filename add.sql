@@ -1,6 +1,15 @@
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT unique_name UNIQUE (name);
 
+ALTER TABLE ONLY public.tickets
+    ADD CONSTRAINT unique_channel_id UNIQUE (channel_id);
+
+ALTER TABLE ONLY public.tickets
+    ADD CONSTRAINT unique_admin_message_id UNIQUE (admin_message_id);
+
+ALTER TABLE ONLY public.tickets
+    ADD CONSTRAINT unique_ticker_number UNIQUE (ticket_number);
+
 ALTER TABLE users 
 ALTER COLUMN discord_id SET NOT NULL;
 
@@ -131,3 +140,5 @@ ALTER TABLE admins ALTER COLUMN created_at SET NOT NULL;
 ALTER TABLE users ALTER COLUMN first_joined SET NOT NULL;
 ALTER TABLE tickets ALTER COLUMN mc_name SET NOT NULL;
 ALTER TABLE admins ALTER COLUMN vanished SET NOT NULL;
+ALTER TABLE users 
+ALTER COLUMN session_start SET DEFAULT NULL;
