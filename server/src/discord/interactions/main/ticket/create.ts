@@ -9,7 +9,7 @@ import {
   PermissionFlagsBits,
 } from "discord.js";
 import logger from "@/logger";
-import { ticketQueries, users } from "@/db";
+import { tickets, users } from "@/db";
 import { TicketCreateParams } from "@/types/models/ticket.types";
 
 /**
@@ -37,8 +37,24 @@ export default async function createTicket(
       });
       return;
     }
-
-    const existingTicket = await ticketQueries.findOpenByDiscordId(user.id);
+    [
+      {
+        resource:
+          "/c:/Users/matej/Projects/mc-page-typescript/server/src/db/queries/ticket.queries.ts",
+        owner: "typescript",
+        code: "2345",
+        severity: 8,
+        message:
+          "Argument of type 'Status | undefined' is not assignable to parameter of type 'Status'.\n  Type 'undefined' is not assignable to type 'Status'.",
+        source: "ts",
+        startLineNumber: 110,
+        startColumn: 46,
+        endLineNumber: 110,
+        endColumn: 52,
+        origin: "extHost1",
+      },
+    ];
+    const existingTicket = await tickets.find({ discordId: user.id });
 
     if (existingTicket) {
       await interaction.reply({
@@ -49,7 +65,7 @@ export default async function createTicket(
     }
 
     const mcName = await users.name({ discordId: user.id });
-    const ticketNumber = await ticketQueries.getNext();
+    const ticketNumber = await tickets.next();
     const ticketName = `ticket-${ticketNumber.toString().padStart(4, "0")}`;
 
     if (!mainBot.user) {
@@ -102,7 +118,7 @@ export default async function createTicket(
       channel_id: ticketChannel.id,
     };
 
-    await ticketQueries.create(newTicket);
+    await tickets.create(newTicket);
 
     const adminRoleId = process.env.DISCORD_ADMIN_ROLE_ID;
     const welcomeEmbed = new EmbedBuilder()

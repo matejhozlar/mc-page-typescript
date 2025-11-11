@@ -1,8 +1,13 @@
 import type { Pool } from "pg";
-import type { AiMessageLogCreateParams } from "@/types/models/ai-message-log.types";
+import type {
+  AiMessageLog,
+  AiMessageLogCreateParams,
+} from "./ai-message-log.types";
 import logger from "@/logger";
 
 export class AiMessageLogQueries {
+  protected readonly table = "ai_message_log";
+
   constructor(private db: Pool) {}
 
   /**
@@ -14,7 +19,7 @@ export class AiMessageLogQueries {
    */
   async getToday(discordId: string): Promise<number> {
     const result = await this.db.query<{ count: string }>(
-      `SELECT COUNT(*) FROM ai_message_log
+      `SELECT COUNT(*) FROM ${this.table}
              WHERE discord_id = $1 AND created_at::date = CURRENT_DATE`,
       [discordId]
     );
@@ -30,7 +35,7 @@ export class AiMessageLogQueries {
    */
   async create(params: AiMessageLogCreateParams): Promise<void> {
     await this.db.query(
-      `INSERT INTO ai_message_log (discord_id, message)
+      `INSERT INTO ${this.table} (discord_id, message)
          VALUES ($1, $2)`,
       [params.discord_id, params.message]
     );

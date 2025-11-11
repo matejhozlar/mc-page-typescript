@@ -9,3 +9,7 @@ export interface Admin {
   created_at: Date;
   vanished: boolean;
 }
+
+export interface AdminCreateParams {
+  discord_id: string;
+}

@@ -1,5 +1,5 @@
 import type { Pool } from "pg";
-import type { TokenPriceAlert } from "@/types/models/token-price-alert.types";
+import { TokenAlert } from "./token-alert/token-alert.types";
 import logger from "@/logger";
 
 export class TokenPriceAlertQueries {
@@ -11,8 +11,8 @@ export class TokenPriceAlertQueries {
    * @param symbol - The token symbol to search for (eg. "RGC", "PLC")
    * @returns Promise resolving to an array of price alerts for the specified token
    */
-  async findBySymbol(symbol: string): Promise<TokenPriceAlert[]> {
-    const result = await this.db.query<TokenPriceAlert>(
+  async findBySymbol(symbol: string): Promise<TokenAlert[]> {
+    const result = await this.db.query<TokenAlert>(
       `SELECT id, discord_id, token_symbol, target_price, created_at, direction
              FROM token_price_alerts
              WHERE token_symbol = $1`,
@@ -28,8 +28,8 @@ export class TokenPriceAlertQueries {
    * @param tokenId - The unique identifier of the crypto token
    * @returns Promise resolving to an array of price alerts associated with the token
    */
-  async findByTokenId(tokenId: number): Promise<TokenPriceAlert[]> {
-    const result = await this.db.query<TokenPriceAlert>(
+  async findByTokenId(tokenId: number): Promise<TokenAlert[]> {
+    const result = await this.db.query<TokenAlert>(
       `SELECT tpa.id, tpa.discord_id, tpa.token_symbol, tpa.target_price, tpa.created_at, tpa.direction
          FROM token_price_alerts
          WHERE tpa.token_symbol = (

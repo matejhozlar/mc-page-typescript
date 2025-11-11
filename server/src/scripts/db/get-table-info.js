@@ -86,28 +86,50 @@ async function getTableInfo(tableName) {
 
     const referencedBy = await pool.query(referencedByQuery, [tableName]);
 
+    const uniqueColumnsQuery = `
+      SELECT DISTINCT
+        kcu.column_name
+      FROM information_schema.table_constraints AS tc
+      JOIN information_schema.key_column_usage AS kcu
+        ON tc.constraint_name = kcu.constraint_name
+        AND tc.table_schema = kcu.table_schema
+      WHERE tc.table_name = $1
+        AND (tc.constraint_type = 'UNIQUE' OR tc.constraint_type = 'PRIMARY KEY');
+    `;
+
+    const uniqueColumns = await pool.query(uniqueColumnsQuery, [tableName]);
+    const uniqueColumnNames = new Set(
+      uniqueColumns.rows.map((row) => row.column_name)
+    );
+
     output += `# Table: ${tableName}\n\n`;
     output += `Generated on: ${new Date().toLocaleString()}\n\n`;
 
     output += `## Table of Contents\n\n`;
-    output += `- [Columns](#-columns)\n`;
-    output += `- [Constraints](#-constraints)\n`;
+    output += `- [Columns](#columns)\n`;
+    output += `- [Constraints](#constraints)\n`;
     if (foreignKeys.rows.length > 0) {
-      output += `- [Foreign Keys (References)](#-foreign-keys-references)\n`;
+      output += `- [Foreign Keys (References)](#foreign-keys-references)\n`;
     }
     if (referencedBy.rows.length > 0) {
-      output += `- [Referenced By](#-referenced-by)\n`;
+      output += `- [Referenced By](#referenced-by)\n`;
     }
-    output += `- [TypeScript Interface](#-typescript-interface)\n\n`;
+    output += `- [TypeScript Interfaces](#typescript-interfaces)\n`;
+    output += `  - [Full Interface](#full-interface)\n`;
+    output += `  - [Identifiers Interface](#identifiers-interface)\n`;
+    output += `  - [Non-Identifiers Interface](#non-identifiers-interface)\n\n`;
 
     output += `## Columns\n\n`;
-    output += `| Column Name | Data Type | Max Length | Nullable | Default |\n`;
-    output += `|-------------|-----------|------------|----------|----------|\n`;
+    output += `| Column Name | Data Type | Max Length | Nullable | Default | Unique |\n`;
+    output += `|-------------|-----------|------------|----------|---------|--------|\n`;
 
     for (const col of columns.rows) {
+      const isUnique = uniqueColumnNames.has(col.column_name);
       output += `| ${col.column_name} | ${col.data_type} | ${
         col.character_maximum_length || "N/A"
-      } | ${col.is_nullable} | ${col.column_default || "None"} |\n`;
+      } | ${col.is_nullable} | ${col.column_default || "None"} | ${
+        isUnique ? "✓" : ""
+      } |\n`;
     }
 
     output += `\n`;
@@ -151,9 +173,40 @@ async function getTableInfo(tableName) {
       output += `\n`;
     }
 
-    output += `## TypeScript Interface\n\n`;
+    output += `## TypeScript Interfaces\n\n`;
+
+    output += `### Full Interface\n\n`;
     output += "```typescript\n";
-    output += generateInterface(tableName, columns.rows, foreignKeys.rows);
+    output += generateInterface(
+      tableName,
+      columns.rows,
+      foreignKeys.rows,
+      uniqueColumnNames
+    );
+    output += "```\n\n";
+
+    output += `### Identifiers Interface\n\n`;
+    output +=
+      "This interface contains only unique/identifier columns (primary keys and unique constraints).\n\n";
+    output += "```typescript\n";
+    output += generateIdentifiersInterface(
+      tableName,
+      columns.rows,
+      foreignKeys.rows,
+      uniqueColumnNames
+    );
+    output += "```\n\n";
+
+    output += `### Non-Identifiers Interface\n\n`;
+    output +=
+      "This interface contains only non-unique columns (excluding identifiers).\n\n";
+    output += "```typescript\n";
+    output += generateNonIdentifiersInterface(
+      tableName,
+      columns.rows,
+      foreignKeys.rows,
+      uniqueColumnNames
+    );
     output += "```\n";
 
     console.log("\nTable:", tableName);
@@ -173,8 +226,37 @@ async function getTableInfo(tableName) {
       console.table(referencedBy.rows);
     }
 
-    console.log("\nTypeScript Interface:");
-    console.log(generateInterface(tableName, columns.rows, foreignKeys.rows));
+    console.log("\nUnique Columns (Identifiers):");
+    console.log([...uniqueColumnNames]);
+
+    console.log("\nTypeScript Interfaces:");
+    console.log("\n--- Full Interface ---");
+    console.log(
+      generateInterface(
+        tableName,
+        columns.rows,
+        foreignKeys.rows,
+        uniqueColumnNames
+      )
+    );
+    console.log("\n--- Identifiers Interface ---");
+    console.log(
+      generateIdentifiersInterface(
+        tableName,
+        columns.rows,
+        foreignKeys.rows,
+        uniqueColumnNames
+      )
+    );
+    console.log("\n--- Non-Identifiers Interface ---");
+    console.log(
+      generateNonIdentifiersInterface(
+        tableName,
+        columns.rows,
+        foreignKeys.rows,
+        uniqueColumnNames
+      )
+    );
 
     mkdirSync(outDir, { recursive: true });
     const outputPath = join(outDir, `${tableName}.md`);
@@ -188,7 +270,7 @@ async function getTableInfo(tableName) {
   }
 }
 
-function generateInterface(tableName, columns, foreignKeys) {
+function generateInterface(tableName, columns, foreignKeys, uniqueColumnNames) {
   const typeMap = {
     uuid: "string",
     text: "string",
@@ -202,13 +284,10 @@ function generateInterface(tableName, columns, foreignKeys) {
     decimal: "string",
     bigint: "string",
     int8: "string",
-    numeric: "string",
-    decimal: "string",
     real: "number",
     float4: "number",
     "double precision": "number",
     float8: "number",
-    boolean: "boolean",
     bool: "boolean",
     json: "any",
     jsonb: "any",
@@ -216,9 +295,7 @@ function generateInterface(tableName, columns, foreignKeys) {
     bytea: "Buffer",
   };
 
-  const interfaceName =
-    tableName.charAt(0).toUpperCase() +
-    tableName.slice(1).replace(/_([a-z])/g, (_, l) => l.toUpperCase());
+  const interfaceName = toPascalCase(tableName);
 
   let result = `export interface ${interfaceName} {\n`;
 
@@ -246,6 +323,90 @@ function generateInterface(tableName, columns, foreignKeys) {
       typeAnnotation = `${col.column_name}: ${tsType};`;
     }
 
+    const comments = [];
+    if (fkMap.has(col.column_name)) {
+      comments.push(`Foreign key to ${fkMap.get(col.column_name)} table`);
+    }
+    if (uniqueColumnNames.has(col.column_name)) {
+      comments.push("Identifier/Unique");
+    }
+
+    if (comments.length > 0) {
+      result += `  /** ${comments.join(" | ")} */\n`;
+    }
+
+    result += `  ${typeAnnotation}\n`;
+  }
+
+  result += "}\n";
+  return result;
+}
+
+function generateIdentifiersInterface(
+  tableName,
+  columns,
+  foreignKeys,
+  uniqueColumnNames
+) {
+  const typeMap = {
+    uuid: "string",
+    text: "string",
+    "character varying": "string",
+    integer: "number",
+    boolean: "boolean",
+    "timestamp without time zone": "Date",
+    "timestamp with time zone": "Date",
+    date: "Date",
+    numeric: "string",
+    decimal: "string",
+    bigint: "string",
+    int8: "string",
+    real: "number",
+    float4: "number",
+    "double precision": "number",
+    float8: "number",
+    bool: "boolean",
+    json: "any",
+    jsonb: "any",
+    array: "any[]",
+    bytea: "Buffer",
+  };
+
+  const interfaceName = toPascalCase(tableName) + "Identifiers";
+  const identifierColumns = columns.filter((col) =>
+    uniqueColumnNames.has(col.column_name)
+  );
+
+  if (identifierColumns.length === 0) {
+    return `// No unique/identifier columns found for ${tableName}\n`;
+  }
+
+  let result = `export interface ${interfaceName} {\n`;
+
+  const fkMap = new Map();
+  for (const fk of foreignKeys) {
+    fkMap.set(fk.column_name, fk.foreign_table_name);
+  }
+
+  for (const col of identifierColumns) {
+    const tsType = typeMap[col.data_type] || "any";
+
+    const hasDefault =
+      col.column_default !== null && col.column_default !== undefined;
+    const isNullable = col.is_nullable === "YES";
+
+    let typeAnnotation;
+
+    if (hasDefault && !isNullable) {
+      typeAnnotation = `${col.column_name}: ${tsType};`;
+    } else if (hasDefault && isNullable) {
+      typeAnnotation = `${col.column_name}: ${tsType} | null;`;
+    } else if (!hasDefault && isNullable) {
+      typeAnnotation = `${col.column_name}: ${tsType} | null;`;
+    } else {
+      typeAnnotation = `${col.column_name}: ${tsType};`;
+    }
+
     if (fkMap.has(col.column_name)) {
       result += `  /** Foreign key to ${fkMap.get(col.column_name)} table */\n`;
     }
@@ -255,6 +416,89 @@ function generateInterface(tableName, columns, foreignKeys) {
 
   result += "}\n";
   return result;
+}
+
+function generateNonIdentifiersInterface(
+  tableName,
+  columns,
+  foreignKeys,
+  uniqueColumnNames
+) {
+  const typeMap = {
+    uuid: "string",
+    text: "string",
+    "character varying": "string",
+    integer: "number",
+    boolean: "boolean",
+    "timestamp without time zone": "Date",
+    "timestamp with time zone": "Date",
+    date: "Date",
+    numeric: "string",
+    decimal: "string",
+    bigint: "string",
+    int8: "string",
+    real: "number",
+    float4: "number",
+    "double precision": "number",
+    float8: "number",
+    bool: "boolean",
+    json: "any",
+    jsonb: "any",
+    array: "any[]",
+    bytea: "Buffer",
+  };
+
+  const interfaceName = toPascalCase(tableName) + "NonIdentifiers";
+  const nonIdentifierColumns = columns.filter(
+    (col) => !uniqueColumnNames.has(col.column_name)
+  );
+
+  if (nonIdentifierColumns.length === 0) {
+    return `// No non-identifier columns found for ${tableName}\n`;
+  }
+
+  let result = `export interface ${interfaceName} {\n`;
+
+  const fkMap = new Map();
+  for (const fk of foreignKeys) {
+    fkMap.set(fk.column_name, fk.foreign_table_name);
+  }
+
+  for (const col of nonIdentifierColumns) {
+    const tsType = typeMap[col.data_type] || "any";
+
+    const hasDefault =
+      col.column_default !== null && col.column_default !== undefined;
+    const isNullable = col.is_nullable === "YES";
+
+    let typeAnnotation;
+
+    if (hasDefault && !isNullable) {
+      typeAnnotation = `${col.column_name}: ${tsType};`;
+    } else if (hasDefault && isNullable) {
+      typeAnnotation = `${col.column_name}: ${tsType} | null;`;
+    } else if (!hasDefault && isNullable) {
+      typeAnnotation = `${col.column_name}: ${tsType} | null;`;
+    } else {
+      typeAnnotation = `${col.column_name}: ${tsType};`;
+    }
+
+    if (fkMap.has(col.column_name)) {
+      result += `  /** Foreign key to ${fkMap.get(col.column_name)} table */\n`;
+    }
+
+    result += `  ${typeAnnotation}\n`;
+  }
+
+  result += "}\n";
+  return result;
+}
+
+function toPascalCase(str) {
+  return (
+    str.charAt(0).toUpperCase() +
+    str.slice(1).replace(/_([a-z])/g, (_, l) => l.toUpperCase())
+  );
 }
 
 const tableName = process.argv[2];

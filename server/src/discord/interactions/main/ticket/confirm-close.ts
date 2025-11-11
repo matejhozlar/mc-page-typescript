@@ -13,7 +13,7 @@ import {
 } from "discord.js";
 import logger from "@/logger";
 import { isTextChannel } from "@/discord/utils/channel-guard";
-import { ticketQueries } from "@/db";
+import { tickets } from "@/db";
 
 /**
  * Closes a support ticket by hiding the channel from the user and displaying
@@ -82,7 +82,10 @@ export default async function confirmCloseTicket(
       components: [adminRow],
     });
 
-    await ticketQueries.updateAdminPanelId(channel.id, adminPanelMessage.id);
+    await tickets.update(
+      { channelId: channel.id },
+      { adminMessageId: adminPanelMessage.id }
+    );
   } catch (error) {
     logger.error("Failed to close ticket:", error);
     await interaction.reply({

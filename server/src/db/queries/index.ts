@@ -1,9 +1,9 @@
-export { UserQueries } from "./user.queries";
-export { WaitlistQueries } from "./waitlist.queries";
-export { AdminQueries } from "./admin.queries";
-export { TicketQueries } from "./ticket.queries";
-export { AiMessageLogQueries } from "./ai-message-log.queries";
-export { ChatTokenQueries } from "./chat-token.queries";
+export { UserQueries } from "./user/user.queries";
+export { WaitlistQueries } from "./waitlist/waitlist.queries";
+export { AdminQueries } from "./admin/admin.queries";
+export { TicketQueries } from "./ticket/ticket.queries";
+export { AiMessageLogQueries } from "./ai-message-log/ai-message-log.queries";
+export { ChatTokenQueries } from "./chat-token/chat-token.queries";
 export { TokenPriceHistoryQueries } from "./token-price-history.queries";
 export { CryptoTokenQueries } from "./crypto-tokens.queries";
 export { TokenPriceAlertQueries } from "./token-price-alert.queries";

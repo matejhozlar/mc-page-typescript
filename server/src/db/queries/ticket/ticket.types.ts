@@ -16,11 +16,9 @@ export interface Ticket {
   admin_message_id: string | null;
 }
 
-export interface TicketCreateParams {
+export interface TicketCreate {
   ticket_number: number;
-  /** Foreign key to users table */
   discord_id: string;
-  /** Foreign key to users table */
   mc_name: string;
   channel_id: string;
 }

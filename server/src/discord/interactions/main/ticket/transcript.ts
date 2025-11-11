@@ -1,7 +1,7 @@
 import type { ButtonInteraction, Client, GuildMember } from "discord.js";
 import { AttachmentBuilder, EmbedBuilder } from "discord.js";
 import logger from "@/logger";
-import { ticketQueries } from "@/db";
+import { tickets } from "@/db";
 import {
   isTextChannel,
   isSendableChannel,
@@ -49,7 +49,7 @@ export default async function transcriptTicket(
       )
       .join("\n");
 
-    const ticket = await ticketQueries.findByChannelId(channel.id);
+    const ticket = await tickets.find({ channelId: channel.id });
 
     if (!ticket) {
       logger.error("Ticket not found in database");

@@ -12,3 +12,9 @@ export interface User {
   session_start: Date | null;
   first_joined: Date;
 }
+
+export interface UserCreate {
+  uuid: string;
+  name: string;
+  discordId: string;
+}

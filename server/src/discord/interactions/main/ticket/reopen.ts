@@ -1,7 +1,7 @@
 import type { ButtonInteraction, Client } from "discord.js";
 import { EmbedBuilder, MessageFlags, PermissionFlagsBits } from "discord.js";
 import logger from "@/logger";
-import { ticketQueries } from "@/db";
+import { tickets } from "@/db";
 import { isTextChannel } from "@/discord/utils/channel-guard";
 
 /**
@@ -27,7 +27,7 @@ export default async function reopenTicket(
   }
 
   try {
-    const ticket = await ticketQueries.findByChannelId(channel.id);
+    const ticket = await tickets.find({ channelId: channel.id });
 
     if (!ticket) {
       await interaction.reply({
@@ -65,7 +65,7 @@ export default async function reopenTicket(
       ReadMessageHistory: true,
     });
 
-    await ticketQueries.markAsOpen(channel.id);
+    await tickets.open({ channelId: channel.id });
 
     await interaction.deferUpdate();
 

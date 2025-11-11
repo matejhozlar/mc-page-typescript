@@ -1,7 +1,7 @@
 import type { ButtonInteraction, Client } from "discord.js";
 import { EmbedBuilder } from "discord.js";
 import logger from "@/logger";
-import { ticketQueries } from "@/db";
+import { tickets } from "@/db";
 import { isSendableChannel } from "@/discord/utils/channel-guard";
 
 /**
@@ -30,7 +30,7 @@ export default async function deleteTicket(
       await channel.send({ embeds: [embed] });
     }
 
-    await ticketQueries.markAsDeleted(channel.id);
+    await tickets.close({ channelId: channel.id });
 
     setTimeout(() => {
       channel.delete().catch((error) => {

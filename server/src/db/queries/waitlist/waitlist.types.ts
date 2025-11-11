@@ -10,6 +10,11 @@ export interface Waitlist {
   discord_name: string | null;
 }
 
+export interface WaitlistCreateParams {
+  email: string;
+  discord_name: string;
+}
+
 export interface WaitlistSubmission {
   id: number;
   email: string;

@@ -1,0 +1,599 @@
+import type { Pool, QueryResultRow } from "pg";
+import logger from "@/logger";
+import { createNotFoundError } from "../utils/query-helpers";
+
+/**
+ * Base class for database query operations
+ * Provides common CRUD functionality that can be extended by specific entity data
+ */
+export abstract class BaseQueries<
+  TEntity extends QueryResultRow,
+  TIdentifiers extends Record<string, any>,
+  TFilters extends Record<string, any>,
+  TUpdate extends Record<string, any> = Record<string, any>,
+  TCreate extends Record<string, any> = Record<string, any>
+> {
+  protected abstract readonly table: string;
+  protected abstract readonly COLUMN_MAP: Record<string, string>;
+
+  constructor(protected db: Pool) {}
+
+  /**
+   * Maps an identifier/filter object to its corresponding database column and value
+   *
+   * @param data - Data object
+   * @returns Object containing the column and value
+   * @throws Error if data key is not found
+   */
+  protected getColumnMapping(data: Record<string, any>): {
+    column: string;
+    value: any;
+  } {
+    const key = Object.keys(data)[0];
+    const column = this.COLUMN_MAP[key];
+
+    if (!column) {
+      throw new Error(`Invalid column key: ${key}`);
+    }
+
+    return {
+      column,
+      value: data[key],
+    };
+  }
+
+  /**
+   * Maps an update object to an array of column-value pairs
+   *
+   * @param updates - Update data object
+   * @returns Array of objects containing column names and values
+   */
+  protected getUpdateMapping(updates: TUpdate) {
+    return Object.entries(updates).map(([key, value]) => ({
+      column: this.COLUMN_MAP[key],
+      value,
+    }));
+  }
+
+  /**
+   * Maps a create object to an array of column-value pairs
+   *
+   * @param data - Create data object
+   * @returns Array of objects containing column names and values
+   */
+  protected getCreateMapping(data: TCreate) {
+    return Object.entries(data).map(([key, value]) => ({
+      column: this.COLUMN_MAP[key],
+      value,
+    }));
+  }
+
+  /**
+   * Builds WHERE clause from filter criteria
+   *
+   * @param filters - Object containing filer data
+   * @returns Object containing the WHERE clause and all parameter values
+   */
+  protected buildFilterClause(filters: Partial<TFilters>): {
+    whereClause: string;
+    params: any[];
+  } {
+    const conditions: string[] = [];
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    for (const [key, value] of Object.entries(filters)) {
+      if (!value !== undefined && value !== null) {
+        const column = this.COLUMN_MAP[key];
+        if (column) {
+          conditions.push(`${column} = $${paramIndex}`);
+          params.push(value);
+          paramIndex++;
+        }
+      }
+    }
+
+    return {
+      whereClause: conditions.length > 0 ? conditions.join(" AND ") : "1=1",
+      params,
+    };
+  }
+
+  // ============================================================================
+  // SINGLE ENTITY OPERATIONS (by unique identifiers)
+  // ============================================================================
+
+  /**
+   * Finds a single entity by unique identifier
+   * Returns null if not found
+   *
+   * @param identifier - Unique identifier
+   * @returns Promise resolving to the entity or null
+   */
+  async find(identifier: TIdentifiers): Promise<TEntity | null> {
+    const { column, value } = this.getColumnMapping(identifier);
+    const query = `SELECT * FROM ${this.table} WHERE ${column} = $1 LIMIT 1`;
+
+    try {
+      const result = await this.db.query<TEntity>(query, [value]);
+
+      return result.rows[0] || null;
+    } catch (error) {
+      logger.error(`Failed to find ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves a single entity by unique identifier
+   * Throws an error if not found
+   *
+   * @param identifier - Unique identifier
+   * @returns Promise resolving to the entity
+   * @throws Error if entity is not found
+   */
+  async get(identifier: TIdentifiers): Promise<TEntity> {
+    const entity = await this.find(identifier);
+
+    if (!entity) {
+      throw createNotFoundError(this.table, identifier);
+    }
+
+    return entity;
+  }
+
+  /**
+   * Checks if an entity exists by unique identifier
+   *
+   * @param identifier - Unique identifier
+   * @returns Promise resolving to true if entity exists, false otherwise
+   */
+  async exists(identifier: TIdentifiers): Promise<boolean> {
+    const { column, value } = this.getColumnMapping(identifier);
+    const query = `SELECT EXISTS(SELECT 1 FROM ${this.table} WHERE ${column} = $1)`;
+
+    try {
+      const result = await this.db.query<{ exists: boolean }>(query, [value]);
+
+      return Boolean(result.rows[0].exists);
+    } catch (error) {
+      logger.error(`Failed to check ${this.table} existence:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Updates a single entity by unique identifier
+   *
+   * @param identifier - Unique identifier to find the entity
+   * @param updates - Object containing fields to update
+   * @returns Promise resolving when the update is complete
+   * @throws Error if no entity is found with the specified identifier
+   */
+  async update(identifier: TIdentifiers, updates: TUpdate): Promise<void> {
+    const { column, value } = this.getColumnMapping(identifier);
+    const updateMappings = this.getUpdateMapping(updates);
+
+    const setClauses = updateMappings.map(
+      (mapping, index) => `${mapping.column} = $${index + 2}`
+    );
+
+    const query = `
+        UPDATE ${this.table}
+        SET ${setClauses.join(", ")}
+        WHERE ${column} = $1`;
+
+    const params = [value, ...updateMappings.map((m) => m.value)];
+
+    try {
+      const result = await this.db.query(query, params);
+
+      if (result.rowCount === 0) {
+        throw createNotFoundError(this.table, identifier);
+      }
+    } catch (error) {
+      logger.error(`Failed to update ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Updates a single entity and returns the updated record
+   *
+   * @param identifier - Unique identifier to find the entity
+   * @param updates - Object containing fields to update
+   * @returns Promise resolving to the updated entity
+   * @throws Error if no entity is found with the specified identifier
+   */
+  async updateAndReturn(
+    identifier: TIdentifiers,
+    updates: TUpdate
+  ): Promise<TEntity> {
+    const { column, value } = this.getColumnMapping(identifier);
+    const updateMappings = this.getUpdateMapping(updates);
+
+    const setClauses = updateMappings.map(
+      (mapping, index) => `${mapping.column} = $${index + 2}`
+    );
+
+    const query = `
+        UPDATE ${this.table}
+        SET ${setClauses.join(", ")}
+        WHERE ${column} = $1
+        RETURNING *`;
+
+    const params = [value, ...updateMappings.map((m) => m.value)];
+
+    try {
+      const result = await this.db.query<TEntity>(query, params);
+
+      if (result.rowCount === 0) {
+        throw createNotFoundError(this.table, identifier);
+      }
+
+      return result.rows[0];
+    } catch (error) {
+      logger.error(`Failed to update ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Deletes a single entity by unique identifier
+   *
+   * @param identifier - Unique identifier to find the entity
+   * @returns Promise resolving when the deletion is complete
+   * @throws Error if no entity is found with the specified identifier
+   */
+  async delete(identifier: TIdentifiers): Promise<void> {
+    const { column, value } = this.getColumnMapping(identifier);
+    const query = `DELETE FROM ${this.table} WHERE ${column} = $1`;
+
+    try {
+      const result = await this.db.query(query, [value]);
+
+      if (result.rowCount === 0) {
+        throw createNotFoundError(this.table, identifier);
+      }
+    } catch (error) {
+      logger.error(`Failed to delete ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // MULTIPLE ENTITY OPERATIONS (by non-unique filters)
+  // ============================================================================
+
+  /**
+   * Finds all entities matching the filter criteria
+   *
+   * @param filters - Optional filter criteria (can be partial)
+   * @param options - Optional pagination and sorting options
+   * @returns Promise resolving to an array of entities
+   */
+  async findAll(
+    filters?: Partial<TFilters>,
+    options?: {
+      limit?: number;
+      offset?: number;
+      orderBy?: string;
+      orderDirection?: "ASC" | "DESC";
+    }
+  ): Promise<TEntity[]> {
+    const { whereClause, params } = filters
+      ? this.buildFilterClause(filters)
+      : { whereClause: "1=1", params: [] };
+
+    let query = `SELECT * FROM ${this.table} WHERE ${whereClause}`;
+
+    if (options?.orderBy) {
+      const orderColumn = this.COLUMN_MAP[options.orderBy] || options.orderBy;
+      query += ` ORDER BY ${orderColumn} ${options.orderDirection || "ASC"}`;
+    }
+
+    if (options?.limit) {
+      query += ` LIMIT $${params.length + 1}`;
+      params.push(options.limit);
+    }
+
+    if (options?.offset) {
+      query += ` OFFSET $${params.length + 1}`;
+      params.push(options.offset);
+    }
+
+    try {
+      const result = await this.db.query<TEntity>(query, params);
+      return result.rows;
+    } catch (error) {
+      logger.error(`Failed to find all ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Updates all entities matching the filter criteria
+   * If no filers provided, updates ALL records in the table
+   *
+   * @param updates - Object containing fields to update
+   * @param filters - Optional filter criteria to match specific entries
+   * @returns Promise resolving to the number of rows affected
+   */
+  async updateAll(
+    updates: TUpdate,
+    filers?: Partial<TFilters>
+  ): Promise<number> {
+    const { whereClause, params } = filers
+      ? this.buildFilterClause(filers)
+      : { whereClause: "1=1", params: [] };
+
+    const updateMappings = this.getUpdateMapping(updates);
+
+    const setClauses = updateMappings.map((mapping, index) => {
+      `${mapping.column} = $${params.length + index + 1}`;
+    });
+
+    const query = `
+        UPDATE ${this.table}
+        SET ${setClauses.join(", ")}
+        WHERE ${whereClause}`;
+
+    const allParams = [...params, ...updateMappings.map((m) => m.value)];
+
+    try {
+      const result = await this.db.query(query, allParams);
+
+      logger.info(`Updated ${result.rowCount} ${this.table} record(s)`);
+      return result.rowCount || 0;
+    } catch (error) {
+      logger.error(`Failed to update ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Deletes all entities matching the filter criteria
+   * Filters are required to prevent accidental table-wide deletion
+   *
+   * @param filters - Filter criteria to match specific entities (required)
+   * @returns Promise resolving to the number of rows affected
+   */
+  async deleteAll(filters: Partial<TFilters>): Promise<number> {
+    if (!filters || Object.keys(filters).length === 0) {
+      throw new Error(
+        `deleteAll requires at least one filter. Use drop() to delete all records from ${this.table}`
+      );
+    }
+
+    const { whereClause, params } = this.buildFilterClause(filters);
+    const query = `DELETE FROM ${this.table} WHERE ${whereClause}`;
+
+    try {
+      const result = await this.db.query(query, params);
+      logger.info(`Deleted ${result.rowCount} ${this.table} record(s)`);
+      return result.rowCount || 0;
+    } catch (error) {
+      logger.error(`Failed to delete from ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Drops all records from the table
+   * This is equivalent to TRUNCATE but returns the count of deleted rows
+   * Use with extreme caution - this cannot be undone
+   *
+   * @returns Promise resolving to the number of rows deleted
+   */
+  async drop(): Promise<number> {
+    const query = `DELETE FROM ${this.table}`;
+
+    try {
+      const result = await this.db.query(query);
+      logger.warn(
+        `DROPPED all ${result.rowCount} record(s) from ${this.table}`
+      );
+      return result.rowCount || 0;
+    } catch (error) {
+      logger.error(`Failed to drop ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Truncates the table (faster than drop for large tables)
+   * Resets auto-increment sequences and removes all rows instantly
+   * Use with extreme caution - this cannot be undone
+   *
+   * @param cascade - If true, also truncates tables with foreign key references
+   * @param restartIdentity - If true, restarts identity columns (auto-increment)
+   * @returns Promise resolving to when truncation is complete
+   */
+  async truncate(options?: {
+    cascade?: boolean;
+    restartIdentity?: boolean;
+  }): Promise<void> {
+    let query = `TRUNCATE TABLE ${this.table}`;
+
+    if (options?.restartIdentity) {
+      query += " RESTART IDENTITY";
+    }
+
+    if (options?.cascade) {
+      query += " CASCADE";
+    }
+
+    try {
+      await this.db.query(query);
+      logger.warn(`TRUNCATED table ${this.table}`);
+    } catch (error) {
+      logger.error(`Failed to truncate ${this.table}`);
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // CREATE OPERATIONS
+  // ============================================================================
+
+  /**
+   * Creates and persists a new entity record in the database
+   *
+   * @param data - Object containing creation data
+   * @returns Promise resolving when the entity is created
+   */
+  async create(data: TCreate): Promise<void> {
+    const createMappings = this.getCreateMapping(data);
+
+    const columns = createMappings.map((m) => m.column).join(", ");
+    const placeholders = createMappings
+      .map((_, index) => `$${index + 1}`)
+      .join(", ");
+
+    const values = createMappings.map((m) => m.value);
+
+    const query = `INSERT INTO ${this.table} (${columns}) VALUES (${placeholders})`;
+
+    try {
+      await this.db.query(query, values);
+    } catch (error) {
+      logger.error(`Failed to create ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Creates and return the new entity with generated fields
+   *
+   * @param data - Object containing creation data
+   * @returns Promise resolving to the created entity
+   */
+  async createAndReturn(data: TCreate): Promise<TEntity> {
+    const createMappings = this.getCreateMapping(data);
+
+    const columns = createMappings.map((m) => m.column).join(", ");
+    const placeholders = createMappings
+      .map((_, index) => `$${index + 1}`)
+      .join(", ");
+    const values = createMappings.map((m) => m.value);
+
+    const query = `INSERT INTO ${this.table} (${columns}) VALUES (${placeholders}) RETURNING *`;
+
+    try {
+      const result = await this.db.query<TEntity>(query, values);
+
+      return result.rows[0];
+    } catch (error) {
+      logger.error(`Failed to create ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Insert or update if conflict occurs on constraint
+   * Uses PostgreSQL's ON CONFLICT clause
+   *
+   * @param data - Object containing creation data
+   * @param conflictTarget - Column(s) to check for conflicts
+   * @param updateFields - Fields to update on conflict
+   * @returns Promise resolving to the upserted entity
+   */
+  async upsert(
+    data: TCreate,
+    conflictTarget: keyof TCreate | Array<keyof TCreate>,
+    updateFields?: Array<keyof TCreate>
+  ): Promise<TEntity> {
+    const createMappings = this.getCreateMapping(data);
+    const columns = createMappings.map((m) => m.column).join(", ");
+    const placeholders = createMappings
+      .map((_, index) => `$${index + 1}`)
+      .join(", ");
+    const values = createMappings.map((m) => m.value);
+
+    const conflictColumns = Array.isArray(conflictTarget)
+      ? conflictTarget.map((key) => this.COLUMN_MAP[key as string]).join(", ")
+      : this.COLUMN_MAP[conflictTarget as string];
+
+    const fieldsToUpdate = updateFields
+      ? updateFields.map((key) => this.COLUMN_MAP[key as string])
+      : createMappings.map((m) => m.column);
+
+    const updateClause = fieldsToUpdate
+      .map((col) => `${col} = EXCLUDED.${col}`)
+      .join(", ");
+
+    const query = `
+        INSERT INTO ${this.table} (${columns})
+        VALUES (${placeholders})
+        ON CONFLICT (${conflictColumns})
+        DO UPDATE SET ${updateClause}
+        RETURNING *`;
+
+    try {
+      const result = await this.db.query<TEntity>(query, values);
+
+      return result.rows[0];
+    } catch (error) {
+      logger.error(`Failed to upsert ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // UTILITY METHODS
+  // ============================================================================
+
+  /**
+   * Counts entities matching the filter criteria
+   *
+   * @param filters - Optional filter criteria (can be partial)
+   * @returns Promise resolving to the count
+   */
+  async count(filters?: Partial<TFilters>): Promise<number> {
+    const { whereClause, params } = filters
+      ? this.buildFilterClause(filters)
+      : { whereClause: "1=1", params: [] };
+
+    const query = `SELECT COUNT(*) FROM ${this.table} WHERE ${whereClause}`;
+
+    try {
+      const result = await this.db.query<{ count: number }>(query, params);
+
+      return result.rows[0].count ?? 0;
+    } catch (error) {
+      logger.error(`Failed to count ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Executes a raw SQL query with type safety
+   * Use with caution - bypasses all abstraction layers
+   *
+   * @param query - SQL query string
+   * @param params - Query parameters
+   * @returns Promise resolving to query results
+   */
+  async raw(query: string, params?: any[]): Promise<TEntity[]> {
+    try {
+      const result = await this.db.query<TEntity>(query, params);
+
+      return result.rows;
+    } catch (error) {
+      logger.error(`Failed to execute raw query on ${this.table}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Begins a database transaction
+   * Returns a transaction client that must be commited or rolled back
+   *
+   * @returns Promise resolving to the transaction client
+   */
+  async begin() {
+    const client = await this.db.connect();
+    await client.query("BEGIN");
+    return client;
+  }
+}
