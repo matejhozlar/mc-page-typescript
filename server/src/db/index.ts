@@ -11,6 +11,8 @@ import {
   TokenPriceHistoryQueries,
   CryptoTokenQueries,
   TokenPriceAlertQueries,
+  UserTokenQueries,
+  UserPortfolioQueries,
 } from "./queries";
 
 /**
@@ -43,14 +45,16 @@ const db = new pg.Pool({
   }
 })();
 
-export const userQueries = new UserQueries(db);
-export const waitlistQueries = new WaitlistQueries(db);
-export const adminQueries = new AdminQueries(db);
+export const users = new UserQueries(db);
+export const waitlists = new WaitlistQueries(db);
+export const admins = new AdminQueries(db);
 export const ticketQueries = new TicketQueries(db);
 export const aiMessageLogQueries = new AiMessageLogQueries(db);
 export const chatTokenQueries = new ChatTokenQueries(db);
 export const tokenPriceHistoryQueries = new TokenPriceHistoryQueries(db);
 export const cryptoTokenQueries = new CryptoTokenQueries(db);
 export const tokenPriceAlertQueries = new TokenPriceAlertQueries(db);
+export const userTokenQueries = new UserTokenQueries(db);
+export const userPortfolioQueries = new UserPortfolioQueries(db);
 
 export default db;

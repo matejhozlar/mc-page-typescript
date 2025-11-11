@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { MemecoinPriceService } from "@/services/crypto/memecoin-price.service";
+import { MemecoinPriceService } from "@/services/crypto/memecoins/memecoin-price.service";
 import type { Client } from "discord.js";
 import type { Server as SocketIOServer } from "socket.io";
 

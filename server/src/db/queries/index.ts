@@ -7,3 +7,5 @@ export { ChatTokenQueries } from "./chat-token.queries";
 export { TokenPriceHistoryQueries } from "./token-price-history.queries";
 export { CryptoTokenQueries } from "./crypto-tokens.queries";
 export { TokenPriceAlertQueries } from "./token-price-alert.queries";
+export { UserTokenQueries } from "./user-tokens.queries";
+export { UserPortfolioQueries } from "./user-portfolio-history.queries";

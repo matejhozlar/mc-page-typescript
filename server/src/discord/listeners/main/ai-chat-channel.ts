@@ -1,8 +1,8 @@
 import type { Client, Message } from "discord.js";
-import { askAssistant } from "@/services/ai";
+import { assistantService } from "@/services/ai";
 import logger from "@/logger";
 import { requireProduction } from "@/utils/guard/run-guard";
-import { userQueries, aiMessageLogQueries } from "@/db";
+import { users, aiMessageLogQueries } from "@/db";
 import { isDMChannel } from "@/discord/utils/channel-guard";
 import type { AiMessageLogCreateParams } from "@/types/models/ai-message-log.types";
 import config from "@/config";
@@ -28,7 +28,7 @@ export default function setupAIChatListener(mainBot: Client): void {
     const userId = message.author.id;
 
     try {
-      const user = await userQueries.existsByDiscordId(userId);
+      const user = await users.exists({ discordId: userId });
 
       if (!user) {
         await message.reply(
@@ -47,7 +47,7 @@ export default function setupAIChatListener(mainBot: Client): void {
       }
 
       await message.channel.sendTyping();
-      const response = await askAssistant(message.content);
+      const response = await assistantService.ask(message.content);
       await message.reply(response);
 
       const params: AiMessageLogCreateParams = {

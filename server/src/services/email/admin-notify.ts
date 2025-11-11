@@ -1,10 +1,5 @@
-import type { Client, TextChannel } from "discord.js";
-import {
-  EmbedBuilder,
-  ButtonBuilder,
-  ActionRowBuilder,
-  ButtonStyle,
-} from "discord.js";
+import type { Client } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import logger from "@/logger";
 import config from "@/config";
 import { createTransporter } from "./transporter";

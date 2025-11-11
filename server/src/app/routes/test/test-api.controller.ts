@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { userQueries } from "@/db";
+import { users } from "@/db";
 
 interface TestRouteResponse {
   timestamp: string;
@@ -18,7 +18,7 @@ export function createTestController() {
     },
 
     async getDbTest(req: Request, res: Response): Promise<void> {
-      const count: number = await userQueries.getCount();
+      const count: number = await users.count();
 
       res.json({
         timestamp: new Date().toISOString(),

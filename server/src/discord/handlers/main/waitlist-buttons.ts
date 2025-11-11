@@ -8,7 +8,7 @@ import {
   ComponentType,
 } from "discord.js";
 import logger from "@/logger";
-import { adminQueries } from "@/db";
+import { admins } from "@/db";
 import { sendInviteById } from "@/services/email/send-invite";
 import { requireProduction } from "@/utils/guard/run-guard";
 import { memberHasRole } from "@/discord/utils/roles";
@@ -35,7 +35,7 @@ export async function handleWaitlistButton(
 
   let inDb = false;
   try {
-    inDb = await adminQueries.isAdmin(interaction.user.id);
+    inDb = await admins.exists({ discordId: interaction.user.id });
   } catch (error) {
     logger.error("Error checking admin status:", error);
   }

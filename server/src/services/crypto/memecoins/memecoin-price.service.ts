@@ -1,4 +1,3 @@
-import type { Pool } from "pg";
 import type { Client } from "discord.js";
 import type { Server as SocketIOServer } from "socket.io";
 import {
@@ -30,8 +29,10 @@ export class MemecoinPriceService {
   constructor(private mainBot: Client, private io: SocketIOServer) {}
 
   /**
-   * Simulates price updates for memecoins and handles crashing logic, price alerts,
-   * hourly snapshots, and history trimming.
+   * Executes the main price update cycle for all active memecoins, including price simulation,
+   * crash detection, alert triggering, snapshot creation, and history maintenance
+   *
+   * @returns Promise resolving when all price updates are complete
    */
   async updateMemecoinPrices(): Promise<void> {
     try {
@@ -64,15 +65,19 @@ export class MemecoinPriceService {
         );
         await this.checkAndTriggerAlerts(token.id, token.symbol, newPrice);
         await this.handleHourlySnapshot(token.id, newPriceFormatted);
-        await this.trimOldHistoryEntires(token.id);
+        await this.trimOldHistoryEntries(token.id);
       }
-    } catch (error) {}
+    } catch (error) {
+      logger.error("Failed to update memecoin prices:", error);
+    }
   }
 
   /**
-   * Handles token crash: updates DB, sends notification, deletes alerts
+   * Handles the crash sequence for a memecoin, including database updates, user notification,
+   * and alert cleanup
    *
-   * @param token - Token with ID, symbol
+   * @param token - Object containing the token's ID and symbol
+   * @returns Promise resolving when crash handling is complete
    */
   private async handleTokenCrash(token: {
     id: number;
@@ -104,9 +109,11 @@ export class MemecoinPriceService {
   }
 
   /**
-   * Calculates new price based on volatility tiers
+   * Calculates the next price for a token based on volatility tiers and upward bias,
+   * with change percentage scaled according to current price thresholds
    *
-   * @param currentPrice - Current price of the token
+   * @param currentPrice - The current price of the token
+   * @returns The newly calculated price (never below 0)
    */
   private calculateNewPrice(currentPrice: number): number {
     const direction = Math.random() < UPWARD_BIAS ? 1 : -1;
@@ -116,10 +123,10 @@ export class MemecoinPriceService {
       changePercent = Math.random() * (LOW.max - LOW.min) + LOW.min;
     } else if (currentPrice < MID.priceThreshold) {
       changePercent = Math.random() * MID.max;
-    } else if (currentPrice < HIGH.pricethreshold) {
+    } else if (currentPrice < HIGH.priceThreshold) {
       const scale =
         (currentPrice - MID.priceThreshold) /
-        (HIGH.pricethreshold - MID.priceThreshold);
+        (HIGH.priceThreshold - MID.priceThreshold);
       const maxPercent = MID.max - scale * (MID.max - HIGH.max);
       changePercent = Math.random() * maxPercent;
     } else {
@@ -131,11 +138,13 @@ export class MemecoinPriceService {
   }
 
   /**
-   * Checks alerts and sends notifications to users when triggered
+   * Evaluates price alerts for a token and sends Discord DM notifications to users
+   * whose target prices have been triggered, then removes those alerts
    *
-   * @param tokenId - The ID to notify about
-   * @param symbol - Symbol of the token
-   * @param newPrice - New price of the token
+   * @param tokenId - The unique identifier of the token
+   * @param symbol - The unique symbol of the token for display in notifications
+   * @param newPrice - The newly calculated price to check against alert thresholds
+   * @returns Promise resolving when all triggered alerts are processed
    */
   private async checkAndTriggerAlerts(
     tokenId: number,
@@ -168,11 +177,12 @@ export class MemecoinPriceService {
   }
 
   /**
-   * Sends a Discord DM notification for a triggered price alert
+   * Sends a formatted Discord DM to a user notifying them that their price alert has been triggered
    *
-   * @param discord_id - The user ID to send the message to
-   * @param token_symbol - Symbol of the token
-   * @param direction Above/Under
+   * @param alert - Object containing the user's Discord ID, token symbol, and alert direction
+   * @param symbol - The unique token symbol for displaying purposes
+   * @param newPrice - The current price that triggered the alert
+   * @returns Promise resolving when the notification is sent
    */
   private async sendAlertNotification(
     alert: {
@@ -212,16 +222,19 @@ export class MemecoinPriceService {
   }
 
   /**
-   * Adds hourly snapshot if one doesn't exist in the last 55 minutes
+   * Creates an hourly price snapshot if no snapshot exists within the last 55 minutes
    *
-   * @param tokenId - The token ID to add snapshot for
-   * @param price - The price to snapshot
+   * @param tokenId - The unique identifier of the token
+   * @param price - The current price to snapshot
+   * @returns Promise resolving when the snapshot check/creation is complete
    */
   private async handleHourlySnapshot(
     tokenId: number,
     price: string
   ): Promise<void> {
-    const hasRecent = tokenPriceHistoryQueries.hasRecentHourlySnapshot(tokenId);
+    const hasRecent = await tokenPriceHistoryQueries.hasRecentHourlySnapshot(
+      tokenId
+    );
 
     if (!hasRecent) {
       await tokenPriceHistoryQueries.addHourlyEntry(tokenId, price);
@@ -229,11 +242,12 @@ export class MemecoinPriceService {
   }
 
   /**
-   * Trims old minute-level history entries
+   * Removes the oldest minute-level price history entries to prevent unbounded growth
    *
-   * @param tokenId - The token ID to look for
+   * @param tokenId - The unique identifier of the token
+   * @returns Promise resolving when old entries are trimmed
    */
-  private async trimOldHistoryEntires(tokenId: number): Promise<void> {
+  private async trimOldHistoryEntries(tokenId: number): Promise<void> {
     const oldEntry = await tokenPriceHistoryQueries.getOldestMinuteEntry(
       tokenId
     );

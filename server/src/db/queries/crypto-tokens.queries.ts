@@ -12,7 +12,7 @@ export class CryptoTokenQueries {
    */
   async getActiveMemecoins(): Promise<CryptoToken[]> {
     const result = await this.db.query<CryptoToken>(
-      `SELECT id, name, symbol, description, total_supply, available supply, price_per_unit, is_memecoin, crashed
+      `SELECT id, name, symbol, description, total_supply, available_supply, price_per_unit, is_memecoin, crashed
          FROM crypto_tokens
          WHERE is_memecoin = true AND price_per_unit > 0`
     );

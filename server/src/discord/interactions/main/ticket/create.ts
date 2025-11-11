@@ -9,7 +9,7 @@ import {
   PermissionFlagsBits,
 } from "discord.js";
 import logger from "@/logger";
-import { ticketQueries, userQueries } from "@/db";
+import { ticketQueries, users } from "@/db";
 import { TicketCreateParams } from "@/types/models/ticket.types";
 
 /**
@@ -48,7 +48,7 @@ export default async function createTicket(
       return;
     }
 
-    const mcName = await userQueries.getNameByDiscordId(user.id);
+    const mcName = await users.name({ discordId: user.id });
     const ticketNumber = await ticketQueries.getNext();
     const ticketName = `ticket-${ticketNumber.toString().padStart(4, "0")}`;
 

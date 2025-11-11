@@ -12,7 +12,7 @@ export interface MemecoinsConfig {
       max: number;
     };
     high: {
-      pricethreshold: number;
+      priceThreshold: number;
       max: number;
     };
   };
@@ -70,7 +70,7 @@ const config = {
      * Highly stable — prices fluctuate within a tight 3% range.
      */
     high: {
-      pricethreshold: 10000,
+      priceThreshold: 10000,
       max: 0.3,
     },
   },

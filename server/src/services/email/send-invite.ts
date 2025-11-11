@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import logger from "@/logger";
 import { createTransporter } from "./transporter";
 import type { InviteResult } from "@/types/models/waitlist.types";
-import { waitlistQueries } from "@/db";
+import { waitlists } from "@/db";
 import config from "@/config";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -78,7 +78,7 @@ export async function sendInviteById(id: number): Promise<InviteResult> {
   );
 
   try {
-    const entry = await waitlistQueries.findById(id);
+    const entry = await waitlists.find({ id: id });
 
     if (!entry) {
       return { ok: false, code: 404, msg: "Waitlist entry not found" };
@@ -111,7 +111,7 @@ export async function sendInviteById(id: number): Promise<InviteResult> {
       ],
     };
 
-    await waitlistQueries.updateToken(id, newToken);
+    await waitlists.update({ id: id }, { token: newToken });
     await transporter.sendMail(mailOptions);
 
     logger.info(`Invite sent to ${email} (${discord_name})`);

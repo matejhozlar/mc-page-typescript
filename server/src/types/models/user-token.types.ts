@@ -6,3 +6,7 @@ export interface UserToken {
   amount: string;
   price_at_purchase: string | null;
 }
+
+export interface UserTokenWithPrice extends UserToken {
+  price_per_unit: number;
+}

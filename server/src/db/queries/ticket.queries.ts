@@ -1,153 +1,166 @@
 import type { Pool } from "pg";
-import type { Ticket, TicketCreateParams } from "@/types/models/ticket.types";
+import type { Ticket } from "@/types/models/ticket.types";
 import logger from "@/logger";
+import { createNotFoundError } from "@/db/utils/query-helpers";
+
+type TicketCriteria =
+  | { id: number }
+  | { ticketNumber: number }
+  | { discordId: string }
+  | { mcName: string }
+  | { channelId: string }
+  | { adminMessageId: string };
+
+type TicketUpdate =
+  | { ticketNumber: number }
+  | { discordId: string }
+  | { mcName: string }
+  | { channelId: string }
+  | { adminMessageId: string };
+
+type TicketCriteriaValue = TicketCriteria[keyof TicketCriteria];
+
+export const TicketStatus = {
+  OPEN: "open",
+  DELETED: "deleted",
+} as const;
+
+export type Status = (typeof TicketStatus)[keyof typeof TicketStatus];
 
 export class TicketQueries {
+  private readonly CRITERIA_COLUMN_MAP = {
+    id: "id",
+    ticketNumber: "ticket_number",
+    discordId: "discord_id",
+    mcName: "mc_name",
+    channelId: "channel_id",
+    adminMessageId: "admin_message_id",
+  } as const;
+
   constructor(private db: Pool) {}
 
-  /**
-   * Retrieves the first open (non-deleted) ticket associated with a Discord user
-   *
-   * @param discordId - The Discord user ID to search for
-   * @returns Promise resolving to the user's open ticket if found, null otherwise
-   */
-  async findOpenByDiscordId(discordId: string): Promise<Ticket | null> {
-    const result = await this.db.query<Ticket>(
-      `SELECT * FROM tickets WHERE discord_id = $1 AND status != 'deleted' LIMIT 1`,
-      [discordId]
-    );
+  private getCriteriaMapping(criteria: TicketCriteria): {
+    column: string;
+    value: TicketCriteriaValue;
+  } {
+    const key = Object.keys(
+      criteria
+    )[0] as keyof typeof this.CRITERIA_COLUMN_MAP;
+    const column = this.CRITERIA_COLUMN_MAP[key];
 
-    return result.rows[0] || null;
+    if (!column) {
+      throw new Error("Invalid search criteria");
+    }
+
+    return {
+      column,
+      value: criteria[key as keyof TicketCriteria] as TicketCriteriaValue,
+    };
+  }
+
+  private getUpdateMapping(updates: TicketUpdate) {
+    return Object.entries(updates).map(([key, value]) => ({
+      column:
+        this.CRITERIA_COLUMN_MAP[key as keyof typeof this.CRITERIA_COLUMN_MAP],
+      value,
+    }));
   }
 
   /**
-   * Retrieves a ticket by its associated Discord channel identifier
+   * Finds a ticket by various criteria
+   * Returns null if not found
    *
-   * @param channelId - The Discord channel ID to search for
-   * @returns Promise resolving to the ticket if found, null otherwise
+   * @param criteria - Object with id, ticketNumber, discordId, mcName, channelId, or adminMessageId
+   * @param status - Status of the ticket (open | deleted)
+   * @returns Promise resolving to the Ticket or null
    */
-  async findByChannelId(channelId: string): Promise<Ticket | null> {
-    const result = await this.db.query<Ticket>(
-      `SELECT * FROM tickets WHERE channel_id = $1 LIMIT 1`,
-      [channelId]
-    );
+  async find(criteria: TicketCriteria, status: Status): Promise<Ticket | null> {
+    const { column, value } = this.getCriteriaMapping(criteria);
+    const query = `SELECT * FROM tickets WHERE ${column} = $1 AND status = $2 LIMIT 1`;
 
-    return result.rows[0] || null;
+    try {
+      const result = await this.db.query<Ticket>(query, [value, status]);
+      return result.rows[0] || null;
+    } catch (error) {
+      logger.error("Failed to find ticket:", error);
+      throw error;
+    }
   }
 
   /**
-   * Updates the admin panel message ID reference for a specific ticket
+   * Retrieves a ticket by various criteria
+   * Throws an error if not found
    *
-   * @param channelId - The Discord channel Id of the ticket
-   * @param adminMessageId - The message ID of the admin panel in Discord
+   * @param criteria - Object with id, ticketNumber, discordId, mcName, channelId, or adminMessageId
+   * @param status - Status of the ticket (open | deleted)
+   * @returns Promise resolving to the Ticket
+   * @throws Error if ticket is not found
+   */
+  async get(criteria: TicketCriteria, status: Status): Promise<Ticket> {
+    const ticket = await this.find(criteria, status);
+
+    if (!ticket) {
+      throw createNotFoundError("Ticket", criteria);
+    }
+
+    return ticket;
+  }
+
+  /**
+   * Check if a ticket exists
+   *
+   * @param criteria - Object with id, ticketNumber, discordId, mcName, channelId, or adminMessageId
+   * @param status - Status of the ticket (open | deleted)
+   * @returns Promise resolving to true if ticket exists, false otherwise
+   */
+  async exists(criteria: TicketCriteria, status: Status): Promise<boolean> {
+    const { column, value } = this.getCriteriaMapping(criteria);
+    const query = `SELECT EXISTS(SELECT 1 FROM tickets WHERE ${column} = $1 AND status = $2)`;
+
+    try {
+      const result = await this.db.query<{ exists: boolean }>(query, [
+        value,
+        status,
+      ]);
+      return Boolean(result.rows[0].exists);
+    } catch (error) {
+      logger.error("Failed to check ticket existence:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Updates a ticket by various criteria
+   *
+   * @param criteria - Object with id, ticketNumber, discordId, mcName, channelId, or adminMessageId
+   * @param updates - Object with ticketNumber, discordId, mcName, channelId, or adminMessageId
    * @returns Promise resolving when the update is complete
-   * @throws Error if the ticket with the specified channel ID is not found
+   * @throws Error if no ticket entry is found with the specified criteria or update fails
    */
-  async updateAdminPanelId(
-    channelId: string,
-    adminMessageId: string
-  ): Promise<void> {
-    const result = await this.db.query(
-      `UPDATE tickets
-         SET admin_message_id = $1
-         WHERE channel_id = $2`,
-      [adminMessageId, channelId]
+  async update(criteria: TicketCriteria, updates: TicketUpdate): Promise<void> {
+    const { column, value } = this.getCriteriaMapping(criteria);
+    const updateMappings = this.getUpdateMapping(updates);
+
+    const setClauses = updateMappings.map(
+      (mapping, index) => `${mapping.column} = $${index + 2}`
     );
 
-    if (result.rowCount === 0) {
-      throw new Error(
-        `Failed to update admin panel message ID for ticket with channel_id: ${channelId}`
-      );
+    const query = `
+      UPDATE tickets
+      SET ${setClauses.join(", ")}
+      WHERE ${column} = $1`;
+
+    const params = [value, ...updateMappings.map((m) => m.value)];
+
+    try {
+      const result = await this.db.query(query, params);
+
+      if (result.rowCount === 0) {
+        throw createNotFoundError("Ticket", criteria);
+      }
+    } catch (error) {
+      logger.error("Failed to update ticket:", error);
+      throw error;
     }
-
-    logger.info(
-      "Admin panel message ID updated for ticket channel:",
-      channelId
-    );
-  }
-
-  /**
-   * Atomically increments and retrieves the next sequential ticket number from the counter
-   *
-   * @returns Promise resolving to the next available ticket number
-   * @throws Error if the ticket counter update fails
-   */
-  async getNext(): Promise<number> {
-    const result = await this.db.query<{ last_number: number }>(
-      `UPDATE ticket_counter 
-     SET last_number = last_number + 1 
-     WHERE id = 1 
-     RETURNING last_number`,
-      []
-    );
-
-    if (result.rowCount === 0) {
-      throw new Error("Failed to get next ticket number");
-    }
-
-    return result.rows[0].last_number;
-  }
-
-  /**
-   * Creates and persists a new ticket record in the database
-   *
-   * @param params - Object containing ticket creation data (ticket_number, discord_id, mc_name, channel_id)
-   * @returns Promise resolving when the ticket is created
-   */
-  async create(params: TicketCreateParams): Promise<void> {
-    await this.db.query(
-      `INSERT INTO tickets (ticket_number, discord_id, mc_name, channel_id)
-         VALUES ($1, $2, $3, $4)`,
-      [
-        params.ticket_number,
-        params.discord_id,
-        params.mc_name,
-        params.channel_id,
-      ]
-    );
-  }
-
-  /**
-   * Updates a ticket's status to deleted and recors the timestamp
-   *
-   * @param channelId - The Discord channel ID of the ticket to delete
-   * @returns Promise resolving when the status is updated
-   * @throws Error if no ticket is found with the specified channel ID
-   */
-  async markAsDeleted(channelId: string): Promise<void> {
-    const result = await this.db.query(
-      `UPDATE tickets
-         SET status = 'deleted', updated_at = NOW()
-         WHERE channel_id = $1`,
-      [channelId]
-    );
-
-    if (result.rowCount === 0) {
-      throw new Error(`Ticket not found with channel_id: ${channelId}`);
-    }
-
-    logger.info("Ticket marked as deleted:", channelId);
-  }
-
-  /**
-   * Updates a ticket's status to open and records the timestamp
-   *
-   * @param channelId - The Discord channel ID of the ticket to reopen
-   * @returns Promise resolving when the status is updated
-   * @throws Error if no ticket is found with the specified channel ID
-   */
-  async markAsOpen(channelId: string): Promise<void> {
-    const result = await this.db.query(
-      `UPDATE tickets
-         SET status = 'open', updated_at = NOW()
-         WHERE channel_id = $1`,
-      [channelId]
-    );
-
-    if (result.rowCount === 0) {
-      throw new Error(`Ticket not found with channel_id: ${channelId}`);
-    }
-
-    logger.info("Ticket marked as open:", channelId);
   }
 }
