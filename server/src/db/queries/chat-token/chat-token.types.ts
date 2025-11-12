@@ -10,7 +10,7 @@ export interface ChatToken {
   expires_at: Date;
 }
 
-export interface ChatTokenCreateParams {
+export interface ChatTokenCreate {
   token: string;
   discord_id: string;
   discord_name: string;

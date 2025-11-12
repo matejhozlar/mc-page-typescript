@@ -1,23 +1,21 @@
 import type { Pool } from "pg";
-import type { Admin, AdminCreateParams } from "./admin.types";
+import type { Admin, AdminCreate } from "./admin.types";
 import { BaseQueries } from "../base.queries";
 
-type AdminCriteria = { id: number } | { discordId: string };
+type AdminIdentifier = { id: number } | { discordId: number };
 
-type AdminUpdate = { discordId: string };
+type AdminFilters = { createdAt: Date } | { vanished: boolean };
+
+type AdminUpdate = { vanished: boolean };
 
 export class AdminQueries extends BaseQueries<
   Admin,
-  AdminCriteria,
+  AdminIdentifier,
+  AdminFilters,
   AdminUpdate,
-  AdminCreateParams
+  AdminCreate
 > {
   protected readonly table = "admins";
-
-  protected readonly CRITERIA_COLUMN_MAP = {
-    id: "id",
-    discordId: "discord_id",
-  } as const;
 
   constructor(db: Pool) {
     super(db);

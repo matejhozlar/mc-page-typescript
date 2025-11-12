@@ -31,16 +31,6 @@ export class UserQueries extends BaseQueries<
   UserCreate
 > {
   protected readonly table = "users";
-  protected readonly COLUMN_MAP = {
-    uuid: "uuid",
-    discordId: "discord_id",
-    name: "name",
-    online: "online",
-    lastSeen: "last_seen",
-    playtimeSeconds: "playtime_seconds",
-    sessionStart: "session_start",
-    firstJoined: "first_joined",
-  } as const;
 
   constructor(db: Pool) {
     super(db);

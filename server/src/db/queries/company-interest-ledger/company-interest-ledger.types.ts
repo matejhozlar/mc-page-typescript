@@ -10,5 +10,13 @@ export interface CompanyInterestLedger {
   rate_per_hour: string;
   balance_before: string;
   balance_after: string;
-  created_at: Date | null;
+  created_at: Date;
+}
+
+export interface CompanyInterestLedgerCreate {
+  company_id: number;
+  interest_amount: string;
+  rate_per_hour: string;
+  balance_before: string;
+  balance_after: string;
 }

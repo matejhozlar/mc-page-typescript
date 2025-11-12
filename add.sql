@@ -16,6 +16,45 @@ ALTER COLUMN discord_id SET NOT NULL;
 ALTER TABLE chat_tokens
 ALTER COLUMN discord_name SET NOT NULL;
 
+ALTER TABLE crypto_tokens
+ALTER COLUMN is_memecoin SET NOT NULL;
+
+ALTER TABLE token_price_history_minutes
+ALTER COLUMN recorded_at SET NOT NULL;
+
+ALTER TABLE token_price_history_hourly
+ALTER COLUMN recorded_at SET NOT NULL;
+
+ALTER TABLE token_price_history_daily
+ALTER COLUMN recorded_at SET NOT NULL;
+
+ALTER TABLE token_price_history_weekly
+ALTER COLUMN recorded_at SET NOT NULL;
+
+ALTER TABLE token_price_alerts
+ALTER COLUMN direction SET NOT NULL;
+
+ALTER TABLE user_portfolio_history
+ALTER COLUMN recorded_at SET NOT NULL;
+
+ALTER TABLE company_balance_history
+ALTER COLUMN company_id SET NOT NULL;
+
+ALTER TABLE company_interest_ledger
+ALTER COLUMN created_at SET NOT NULL;
+
+ALTER TABLE company_members
+ALTER COLUMN joined_at SET NOT NULL;
+
+ALTER TABLE company_members
+ALTER COLUMN role SET NOT NULL;
+
+ALTER TABLE companies
+ALTER COLUMN founder_uuid SET NOT NULL;
+
+ALTER TABLE companies
+ALTER COLUMN created_at SET NOT NULL;
+
 ALTER TABLE admins
 ADD CONSTRAINT fk_admins_discord_id
 FOREIGN KEY (discord_id)

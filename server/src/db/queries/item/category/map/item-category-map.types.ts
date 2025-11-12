@@ -8,3 +8,8 @@ export interface ItemCategoryMap {
   /** Foreign key to item_categories table */
   category_id: number;
 }
+
+export interface ItemCategoryMapCreate {
+  item_id: number;
+  category_id: number;
+}

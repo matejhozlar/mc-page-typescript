@@ -10,7 +10,7 @@ export interface Waitlist {
   discord_name: string | null;
 }
 
-export interface WaitlistCreateParams {
+export interface WaitlistCreate {
   email: string;
   discord_name: string;
 }

@@ -33,18 +33,6 @@ export class TicketQueries extends BaseQueries<
 > {
   protected readonly table = "tickets";
 
-  protected readonly COLUMN_MAP = {
-    id: "id",
-    tickerNumber: "ticket_number",
-    discordId: "discord_id",
-    mcName: "mc_name",
-    channelId: "channel_id",
-    status: "status",
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-    adminMessageId: "admin_message_id",
-  } as const;
-
   constructor(db: Pool) {
     super(db);
   }
@@ -57,17 +45,17 @@ export class TicketQueries extends BaseQueries<
    * @throws Error if no ticket is found with the specified identifier
    */
   async close(identifier: TicketIdentifier): Promise<void> {
-    const { column, value } = this.getColumnMapping(identifier);
-    const query = `UPDATE ${this.table} SET status = 'deleted', updated_at = NOW() WHERE ${column} = $1`;
+    const { whereClause, values } = this.getColumnMapping(identifier);
+    const query = `UPDATE ${this.table} SET status = 'deleted', updated_at = NOW() WHERE ${whereClause}`;
 
     try {
-      const result = await this.db.query(query, [value]);
+      const result = await this.db.query(query, values);
 
       if (result.rowCount === 0) {
         throw createNotFoundError(this.table, identifier);
       }
 
-      logger.info("Ticket marked as deleted:", value);
+      logger.info("Ticket marked as deleted:", values);
     } catch (error) {
       logger.error(`Failed to close ${this.table}:`, error);
       throw error;
@@ -82,17 +70,17 @@ export class TicketQueries extends BaseQueries<
    * @throws Error if no ticket is found with the specified identifier
    */
   async open(identifier: TicketIdentifier): Promise<void> {
-    const { column, value } = this.getColumnMapping(identifier);
-    const query = `UPDATE ${this.table} SET status = 'open', updated_at = NOW() WHERE ${column} = $1`;
+    const { whereClause, values } = this.getColumnMapping(identifier);
+    const query = `UPDATE ${this.table} SET status = 'open', updated_at = NOW() WHERE ${whereClause}`;
 
     try {
-      const result = await this.db.query(query, [value]);
+      const result = await this.db.query(query, values);
 
       if (result.rowCount === 0) {
         throw createNotFoundError(this.table, identifier);
       }
 
-      logger.info("Opened a ticket:", value);
+      logger.info("Opened a ticket:", values);
     } catch (error) {
       logger.error(`Failed to open ${this.table}:`, error);
       throw error;

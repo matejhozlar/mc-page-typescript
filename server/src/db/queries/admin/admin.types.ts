@@ -10,6 +10,6 @@ export interface Admin {
   vanished: boolean;
 }
 
-export interface AdminCreateParams {
+export interface AdminCreate {
   discord_id: string;
 }

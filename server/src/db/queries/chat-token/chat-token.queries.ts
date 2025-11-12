@@ -1,28 +1,21 @@
 import type { Pool } from "pg";
-import type { ChatToken, ChatTokenCreateParams } from "./chat-token.types";
+import type { ChatToken, ChatTokenCreate } from "./chat-token.types";
 import { BaseQueries } from "../base.queries";
 
-type ChatTokenCriteria =
-  | { token: string }
-  | { discordId: string }
-  | { discordName: string };
+type ChatTokenIdentifier = { token: string } | { discordId: string };
 
-type ChatTokenUpdate = { discordId: string } | { discordName: string };
+type ChatTokenFilters = { discordName: string } | { expiresAt: Date };
+
+type ChatTokenUpdate = { discordName: string } | { expiresAt: Date };
 
 export class ChatTokenQueries extends BaseQueries<
   ChatToken,
-  ChatTokenCriteria,
+  ChatTokenIdentifier,
+  ChatTokenFilters,
   ChatTokenUpdate,
-  ChatTokenCreateParams
+  ChatTokenCreate
 > {
   protected readonly table = "chat_tokens";
-
-  protected readonly CRITERIA_COLUMN_MAP = {
-    token: "token",
-    discordId: "discord_id",
-    discordName: "discord_name",
-    expiresAt: "expires_at",
-  } as const;
 
   constructor(db: Pool) {
     super(db);

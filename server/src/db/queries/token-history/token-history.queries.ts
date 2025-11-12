@@ -1,8 +1,8 @@
 import type { Pool } from "pg";
 import logger from "@/logger";
-import { TokenPriceHistory } from "@/types/models/token-price-history.types";
+import type { TokenHistory } from "./token-history.types";
 
-export class TokenPriceHistoryQueries {
+export class TokenHistoryQueries {
   constructor(private db: Pool) {}
 
   /**
@@ -59,8 +59,8 @@ export class TokenPriceHistoryQueries {
   async getOldestMinuteEntry(
     tokenId: number,
     limit: number = 100
-  ): Promise<TokenPriceHistory | null> {
-    const result = await this.db.query<TokenPriceHistory>(
+  ): Promise<TokenHistory | null> {
+    const result = await this.db.query<TokenHistory>(
       `SELECT id, token_id, price, recorded_at
        FROM token_price_history_minutes
        WHERE token_id = $1

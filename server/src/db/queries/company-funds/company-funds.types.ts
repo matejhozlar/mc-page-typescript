@@ -4,6 +4,11 @@
  */
 export interface CompanyFunds {
   /** Foreign key to companies table */
-  company_id: string;
+  company_id: number;
+  balance: string;
+}
+
+export interface CompanyFundsCreate {
+  company_id: number;
   balance: string;
 }

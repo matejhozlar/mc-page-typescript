@@ -6,5 +6,11 @@ export interface DailyPlaytime {
   /** Foreign key to users table */
   uuid: string;
   play_date: Date;
-  seconds_played: string;
+  seconds_played: number;
+}
+
+export interface DailyPlaytimeCreate {
+  uuid: string;
+  play_date: Date;
+  seconds_played?: number;
 }

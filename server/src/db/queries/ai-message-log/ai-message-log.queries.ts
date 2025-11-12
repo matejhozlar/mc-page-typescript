@@ -1,14 +1,32 @@
 import type { Pool } from "pg";
-import type {
-  AiMessageLog,
-  AiMessageLogCreateParams,
-} from "./ai-message-log.types";
+import type { AiMessageLog, AiMessageLogCreate } from "./ai-message-log.types";
 import logger from "@/logger";
+import { BaseQueries } from "../base.queries";
 
-export class AiMessageLogQueries {
+type AiMessageLogIdentifier = { id: number };
+
+type AiMessageLogFilters =
+  | { discordId: string }
+  | { message: string }
+  | { createdAt: Date };
+
+type AiMessageLogUpdate =
+  | { discordId: string }
+  | { message: string }
+  | { createdAt: Date };
+
+export class AiMessageLogQueries extends BaseQueries<
+  AiMessageLog,
+  AiMessageLogIdentifier,
+  AiMessageLogFilters,
+  AiMessageLogUpdate,
+  AiMessageLogCreate
+> {
   protected readonly table = "ai_message_log";
 
-  constructor(private db: Pool) {}
+  constructor(db: Pool) {
+    super(db);
+  }
 
   /**
    * Retrieves the count of AI messages sent by a specific user to the current date
@@ -25,21 +43,5 @@ export class AiMessageLogQueries {
     );
 
     return parseInt(result.rows[0]?.count ?? "0", 10);
-  }
-
-  /**
-   * Creates and persists a new AI message log entry for a user
-   *
-   * @param params - Object containing Discord ID and message content to log
-   * @returns Promise resolving when the log entry is created
-   */
-  async create(params: AiMessageLogCreateParams): Promise<void> {
-    await this.db.query(
-      `INSERT INTO ${this.table} (discord_id, message)
-         VALUES ($1, $2)`,
-      [params.discord_id, params.message]
-    );
-
-    logger.info("AI message logged for user:", params.discord_id);
   }
 }

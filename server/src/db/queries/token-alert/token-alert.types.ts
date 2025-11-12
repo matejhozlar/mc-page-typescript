@@ -1,5 +1,3 @@
-import { TokenAlertDirection } from "./token-alert.queries";
-
 /**
  * Database row type for the token_price_alerts table
  * Represents the exact structure returned from PostgreSQL Queries
@@ -12,12 +10,12 @@ export interface TokenAlert {
   token_symbol: string;
   target_price: string;
   created_at: Date | null;
-  direction: string | null;
+  direction: string;
 }
 
-export interface TokenAlertCreateParams {
+export interface TokenAlertCreate {
   discord_id: string;
   token_symbol: string;
   target_price: string;
-  direction: TokenAlertDirection;
+  direction?: "above" | "under";
 }

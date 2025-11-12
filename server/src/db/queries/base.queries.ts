@@ -14,9 +14,30 @@ export abstract class BaseQueries<
   TCreate extends Record<string, any> = Record<string, any>
 > {
   protected abstract readonly table: string;
-  protected abstract readonly COLUMN_MAP: Record<string, string>;
+  protected readonly COLUMN_MAP?: Record<string, string>;
 
   constructor(protected db: Pool) {}
+
+  /**
+   * Converts camelCase to snake_case
+   *
+   * @param str - String to conver to snake_case
+   * @returns - Converted camelCase value
+   */
+  protected camelToSnake(str: string): string {
+    return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+  }
+
+  /**
+   * Gets the database column name for a given key
+   * Uses COLUMN_MAP if provided, otherwise convers camelCase to snake_case
+   *
+   * @param key - Value to convert
+   * @returns Database column name
+   */
+  protected getColumnName(key: string): string {
+    return this.COLUMN_MAP?.[key] ?? this.camelToSnake(key);
+  }
 
   /**
    * Maps an identifier/filter object to its corresponding database column and value
@@ -26,19 +47,32 @@ export abstract class BaseQueries<
    * @throws Error if data key is not found
    */
   protected getColumnMapping(data: Record<string, any>): {
-    column: string;
-    value: any;
+    whereClause: string;
+    values: any[];
   } {
-    const key = Object.keys(data)[0];
-    const column = this.COLUMN_MAP[key];
+    const entries = Object.entries(data);
 
-    if (!column) {
-      throw new Error(`Invalid column key: ${key}`);
+    if (entries.length === 0) {
+      throw new Error("Identifier object cannot be empty");
     }
 
+    const conditions: string[] = [];
+    const values: any[] = [];
+
+    entries.forEach(([key, value], index) => {
+      const column = this.getColumnName(key);
+
+      if (!column) {
+        throw new Error(`Invalid column key: ${key}`);
+      }
+
+      conditions.push(`${column} = $${index + 1}`);
+      values.push(value);
+    });
+
     return {
-      column,
-      value: data[key],
+      whereClause: conditions.join(" AND "),
+      values,
     };
   }
 
@@ -50,7 +84,7 @@ export abstract class BaseQueries<
    */
   protected getUpdateMapping(updates: TUpdate) {
     return Object.entries(updates).map(([key, value]) => ({
-      column: this.COLUMN_MAP[key],
+      column: this.getColumnName(key),
       value,
     }));
   }
@@ -63,7 +97,7 @@ export abstract class BaseQueries<
    */
   protected getCreateMapping(data: TCreate) {
     return Object.entries(data).map(([key, value]) => ({
-      column: this.COLUMN_MAP[key],
+      column: this.getColumnName(key),
       value,
     }));
   }
@@ -83,8 +117,8 @@ export abstract class BaseQueries<
     let paramIndex = 1;
 
     for (const [key, value] of Object.entries(filters)) {
-      if (!value !== undefined && value !== null) {
-        const column = this.COLUMN_MAP[key];
+      if (value !== undefined && value !== null) {
+        const column = this.getColumnName(key);
         if (column) {
           conditions.push(`${column} = $${paramIndex}`);
           params.push(value);
@@ -111,11 +145,11 @@ export abstract class BaseQueries<
    * @returns Promise resolving to the entity or null
    */
   async find(identifier: TIdentifiers): Promise<TEntity | null> {
-    const { column, value } = this.getColumnMapping(identifier);
-    const query = `SELECT * FROM ${this.table} WHERE ${column} = $1 LIMIT 1`;
+    const { whereClause, values } = this.getColumnMapping(identifier);
+    const query = `SELECT * FROM ${this.table} WHERE ${whereClause} LIMIT 1`;
 
     try {
-      const result = await this.db.query<TEntity>(query, [value]);
+      const result = await this.db.query<TEntity>(query, values);
 
       return result.rows[0] || null;
     } catch (error) {
@@ -149,11 +183,11 @@ export abstract class BaseQueries<
    * @returns Promise resolving to true if entity exists, false otherwise
    */
   async exists(identifier: TIdentifiers): Promise<boolean> {
-    const { column, value } = this.getColumnMapping(identifier);
-    const query = `SELECT EXISTS(SELECT 1 FROM ${this.table} WHERE ${column} = $1)`;
+    const { whereClause, values } = this.getColumnMapping(identifier);
+    const query = `SELECT EXISTS(SELECT 1 FROM ${this.table} WHERE ${whereClause})`;
 
     try {
-      const result = await this.db.query<{ exists: boolean }>(query, [value]);
+      const result = await this.db.query<{ exists: boolean }>(query, values);
 
       return Boolean(result.rows[0].exists);
     } catch (error) {
@@ -171,19 +205,21 @@ export abstract class BaseQueries<
    * @throws Error if no entity is found with the specified identifier
    */
   async update(identifier: TIdentifiers, updates: TUpdate): Promise<void> {
-    const { column, value } = this.getColumnMapping(identifier);
+    const { whereClause, values: identifierValues } =
+      this.getColumnMapping(identifier);
     const updateMappings = this.getUpdateMapping(updates);
 
     const setClauses = updateMappings.map(
-      (mapping, index) => `${mapping.column} = $${index + 2}`
+      (mapping, index) =>
+        `${mapping.column} = $${identifierValues.length + index + 1}`
     );
 
     const query = `
         UPDATE ${this.table}
         SET ${setClauses.join(", ")}
-        WHERE ${column} = $1`;
+        WHERE ${whereClause}`;
 
-    const params = [value, ...updateMappings.map((m) => m.value)];
+    const params = [...identifierValues, ...updateMappings.map((m) => m.value)];
 
     try {
       const result = await this.db.query(query, params);
@@ -209,20 +245,22 @@ export abstract class BaseQueries<
     identifier: TIdentifiers,
     updates: TUpdate
   ): Promise<TEntity> {
-    const { column, value } = this.getColumnMapping(identifier);
+    const { whereClause, values: identifierValues } =
+      this.getColumnMapping(identifier);
     const updateMappings = this.getUpdateMapping(updates);
 
     const setClauses = updateMappings.map(
-      (mapping, index) => `${mapping.column} = $${index + 2}`
+      (mapping, index) =>
+        `${mapping.column} = $${identifierValues.length + index + 2}`
     );
 
     const query = `
         UPDATE ${this.table}
         SET ${setClauses.join(", ")}
-        WHERE ${column} = $1
+        WHERE ${whereClause}
         RETURNING *`;
 
-    const params = [value, ...updateMappings.map((m) => m.value)];
+    const params = [...identifierValues, ...updateMappings.map((m) => m.value)];
 
     try {
       const result = await this.db.query<TEntity>(query, params);
@@ -246,11 +284,11 @@ export abstract class BaseQueries<
    * @throws Error if no entity is found with the specified identifier
    */
   async delete(identifier: TIdentifiers): Promise<void> {
-    const { column, value } = this.getColumnMapping(identifier);
-    const query = `DELETE FROM ${this.table} WHERE ${column} = $1`;
+    const { whereClause, values } = this.getColumnMapping(identifier);
+    const query = `DELETE FROM ${this.table} WHERE ${whereClause}`;
 
     try {
-      const result = await this.db.query(query, [value]);
+      const result = await this.db.query(query, values);
 
       if (result.rowCount === 0) {
         throw createNotFoundError(this.table, identifier);
@@ -288,7 +326,7 @@ export abstract class BaseQueries<
     let query = `SELECT * FROM ${this.table} WHERE ${whereClause}`;
 
     if (options?.orderBy) {
-      const orderColumn = this.COLUMN_MAP[options.orderBy] || options.orderBy;
+      const orderColumn = this.getColumnName(options.orderBy);
       query += ` ORDER BY ${orderColumn} ${options.orderDirection || "ASC"}`;
     }
 
@@ -316,22 +354,22 @@ export abstract class BaseQueries<
    * If no filers provided, updates ALL records in the table
    *
    * @param updates - Object containing fields to update
-   * @param filters - Optional filter criteria to match specific entries
+   * @param filtters - Optional filter criteria to match specific entries
    * @returns Promise resolving to the number of rows affected
    */
   async updateAll(
     updates: TUpdate,
-    filers?: Partial<TFilters>
+    filters?: Partial<TFilters>
   ): Promise<number> {
-    const { whereClause, params } = filers
-      ? this.buildFilterClause(filers)
+    const { whereClause, params } = filters
+      ? this.buildFilterClause(filters)
       : { whereClause: "1=1", params: [] };
 
     const updateMappings = this.getUpdateMapping(updates);
 
-    const setClauses = updateMappings.map((mapping, index) => {
-      `${mapping.column} = $${params.length + index + 1}`;
-    });
+    const setClauses = updateMappings.map(
+      (mapping, index) => `${mapping.column} = $${params.length + index + 1}`
+    );
 
     const query = `
         UPDATE ${this.table}
@@ -511,11 +549,13 @@ export abstract class BaseQueries<
     const values = createMappings.map((m) => m.value);
 
     const conflictColumns = Array.isArray(conflictTarget)
-      ? conflictTarget.map((key) => this.COLUMN_MAP[key as string]).join(", ")
-      : this.COLUMN_MAP[conflictTarget as string];
+      ? conflictTarget
+          .map((key) => this.getColumnName(key as string))
+          .join(", ")
+      : this.getColumnName(conflictTarget as string);
 
     const fieldsToUpdate = updateFields
-      ? updateFields.map((key) => this.COLUMN_MAP[key as string])
+      ? updateFields.map((key) => this.getColumnName(key as string))
       : createMappings.map((m) => m.column);
 
     const updateClause = fieldsToUpdate

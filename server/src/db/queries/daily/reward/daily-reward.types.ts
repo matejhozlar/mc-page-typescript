@@ -7,3 +7,7 @@ export interface DailyReward {
   discord_id: string;
   last_claim_at: Date;
 }
+
+export interface DailyRewardCreate {
+  discord_id: string;
+}

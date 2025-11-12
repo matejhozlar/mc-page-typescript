@@ -13,3 +13,13 @@ export interface CryptoToken {
   is_memecoin: boolean | null;
   crashed: Date | null;
 }
+
+export interface CryptoTokenCreate {
+  name: string;
+  symbol: string;
+  description?: string;
+  total_supply: string;
+  available_supply: string;
+  price_per_unit: string;
+  is_memecoin?: boolean;
+}
