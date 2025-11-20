@@ -13,7 +13,7 @@ export interface CompanyEdit {
   short_description: string | null;
   logo_path: string | null;
   banner_path: string | null;
-  gallery_paths: any | null;
+  gallery_paths: string[] | null;
   status: string | null;
   created_at: Date | null;
   reviewed_at: Date | null;
@@ -22,4 +22,18 @@ export interface CompanyEdit {
   fee_required: string | null;
   fee_checked_at: Date | null;
   reason: string | null;
+}
+
+export interface CompanyEditCreate {
+  company_id: number;
+  editor_uuid: string;
+  name?: string;
+  description?: string;
+  short_description?: string;
+  logo_path?: string;
+  gallery_paths?: string[];
+  status?: string;
+  reviewed_by: string;
+  fee_required?: string;
+  reason: string;
 }

@@ -13,6 +13,19 @@ ALTER TABLE ONLY public.tickets
 ALTER TABLE users 
 ALTER COLUMN discord_id SET NOT NULL;
 
+ALTER TABLE company_edits
+ALTER COLUMN company_id SET NOT NULL;
+
+ALTER TABLE company_edits
+ALTER COLUMN editor_uuid SET NOT NULL;
+
+ALTER TABLE company_edits
+ALTER COLUMN reviewed_by SET NOT NULL;
+
+ALTER TABLE company_edits
+ALTER COLUMN created_at SET NOT NULL;
+
+
 ALTER TABLE chat_tokens
 ALTER COLUMN discord_name SET NOT NULL;
 
