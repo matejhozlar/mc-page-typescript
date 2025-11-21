@@ -1,19 +1,6 @@
 import pg from "pg";
 import logger from "@/logger";
 import config from "@/config";
-import {
-  UserQueries,
-  WaitlistQueries,
-  AdminQueries,
-  TicketQueries,
-  AiMessageLogQueries,
-  ChatTokenQueries,
-  TokenPriceHistoryQueries,
-  CryptoTokenQueries,
-  TokenPriceAlertQueries,
-  UserTokenQueries,
-  UserPortfolioQueries,
-} from "./queries";
 
 /**
  * PostgreSQL database pool instance using environment variables
@@ -44,17 +31,5 @@ const db = new pg.Pool({
     process.exit(1);
   }
 })();
-
-export const users = new UserQueries(db);
-export const waitlists = new WaitlistQueries(db);
-export const admins = new AdminQueries(db);
-export const tickets = new TicketQueries(db);
-export const aiMessageLogQueries = new AiMessageLogQueries(db);
-export const chatTokenQueries = new ChatTokenQueries(db);
-export const tokenPriceHistoryQueries = new TokenPriceHistoryQueries(db);
-export const cryptoTokenQueries = new CryptoTokenQueries(db);
-export const tokenPriceAlertQueries = new TokenPriceAlertQueries(db);
-export const userTokenQueries = new UserTokenQueries(db);
-export const userPortfolioQueries = new UserPortfolioQueries(db);
 
 export default db;

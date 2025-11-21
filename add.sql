@@ -10,8 +10,54 @@ ALTER TABLE ONLY public.tickets
 ALTER TABLE ONLY public.tickets
     ADD CONSTRAINT unique_ticker_number UNIQUE (ticket_number);
 
+ALTER TABLE shop_images
+ALTER COLUMN shop_id SET NOT NULL;
+
+ALTER TABLE shop_images
+ALTER COLUMN position SET NOT NULL;
+
+ALTER TABLE shop_images
+ALTER COLUMN uploaded_at SET NOT NULL;
+
+ALTER TABLE shop_images
+ALTER COLUMN url SET NOT NULL;
+
+
+ALTER TABLE shop_images
+ALTER COLUMN type SET NOT NULL;
+
 ALTER TABLE users 
 ALTER COLUMN discord_id SET NOT NULL;
+
+ALTER TABLE logs_rcon
+ALTER COLUMN executed_at SET NOT NULL;
+
+ALTER TABLE companies_rejected
+ALTER COLUMN rejected_at SET NOT NULL;
+
+ALTER TABLE shop_reviews
+ALTER COLUMN created_at SET NOT NULL;
+
+ALTER TABLE companies_rejected
+ALTER COLUMN founder_uuid SET NOT NULL;
+
+ALTER TABLE snapshots_playtime
+ALTER COLUMN snapshot_time SET NOT NULL;
+
+ALTER TABLE shops
+ALTER COLUMN created_at SET NOT NULL;
+
+ALTER TABLE shops
+ALTER COLUMN is_paid SET NOT NULL;
+
+ALTER TABLE shops
+ALTER COLUMN company_id SET NOT NULL;
+
+ALTER TABLE company_edits_rejected
+ALTER COLUMN rejected_at SET NOT NULL;
+
+ALTER TABLE company_edits_rejected
+ALTER COLUMN rejected_at SET NOT NULL;
 
 ALTER TABLE company_edits
 ALTER COLUMN company_id SET NOT NULL;
@@ -64,6 +110,36 @@ ALTER COLUMN role SET NOT NULL;
 
 ALTER TABLE companies
 ALTER COLUMN founder_uuid SET NOT NULL;
+
+ALTER TABLE company_images
+ALTER COLUMN company_id SET NOT NULL;
+
+ALTER TABLE company_images
+ALTER COLUMN type SET NOT NULL;
+
+ALTER TABLE company_images
+ALTER COLUMN position SET NOT NULL;
+
+ALTER TABLE company_images
+ALTER COLUMN uploaded_at SET NOT NULL;
+
+ALTER TABLE company_transactions
+ALTER COLUMN company_id SET NOT NULL;
+
+ALTER TABLE company_transactions
+ALTER COLUMN user_uuid SET NOT NULL;
+
+ALTER TABLE company_transactions
+ALTER COLUMN type SET NOT NULL;
+
+ALTER TABLE company_transactions
+ALTER COLUMN amount SET NOT NULL;
+
+ALTER TABLE company_transactions
+ALTER COLUMN created_at SET NOT NULL;
+
+ALTER TABLE currency_transactions
+ALTER COLUMN timestamp SET NOT NULL;
 
 ALTER TABLE companies
 ALTER COLUMN created_at SET NOT NULL;

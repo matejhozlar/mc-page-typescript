@@ -7,11 +7,13 @@ import { createNotFoundError } from "../utils/query-helpers";
  * Provides common CRUD functionality that can be extended by specific entity data
  */
 export abstract class BaseQueries<
-  TEntity extends QueryResultRow,
-  TIdentifiers extends Record<string, any>,
-  TFilters extends Record<string, any>,
-  TUpdate extends Record<string, any> = Record<string, any>,
-  TCreate extends Record<string, any> = Record<string, any>
+  TConfig extends {
+    Entity: QueryResultRow;
+    Identifier?: Record<string, any>;
+    Filters?: Record<string, any>;
+    Update?: Record<string, any>;
+    Create?: Record<string, any>;
+  }
 > {
   protected abstract readonly table: string;
   protected readonly COLUMN_MAP?: Record<string, string>;
@@ -82,7 +84,7 @@ export abstract class BaseQueries<
    * @param updates - Update data object
    * @returns Array of objects containing column names and values
    */
-  protected getUpdateMapping(updates: TUpdate) {
+  protected getUpdateMapping(updates: Partial<NonNullable<TConfig["Update"]>>) {
     return Object.entries(updates).map(([key, value]) => ({
       column: this.getColumnName(key),
       value,
@@ -95,7 +97,7 @@ export abstract class BaseQueries<
    * @param data - Create data object
    * @returns Array of objects containing column names and values
    */
-  protected getCreateMapping(data: TCreate) {
+  protected getCreateMapping(data: NonNullable<TConfig["Create"]>) {
     return Object.entries(data).map(([key, value]) => ({
       column: this.getColumnName(key),
       value,
@@ -108,7 +110,9 @@ export abstract class BaseQueries<
    * @param filters - Object containing filer data
    * @returns Object containing the WHERE clause and all parameter values
    */
-  protected buildFilterClause(filters: Partial<TFilters>): {
+  protected buildFilterClause(
+    filters: Partial<NonNullable<TConfig["Filters"]>>
+  ): {
     whereClause: string;
     params: any[];
   } {
@@ -144,12 +148,14 @@ export abstract class BaseQueries<
    * @param identifier - Unique identifier
    * @returns Promise resolving to the entity or null
    */
-  async find(identifier: TIdentifiers): Promise<TEntity | null> {
+  async find(
+    identifier: NonNullable<TConfig["Identifier"]>
+  ): Promise<TConfig["Entity"] | null> {
     const { whereClause, values } = this.getColumnMapping(identifier);
     const query = `SELECT * FROM ${this.table} WHERE ${whereClause} LIMIT 1`;
 
     try {
-      const result = await this.db.query<TEntity>(query, values);
+      const result = await this.db.query<TConfig["Entity"]>(query, values);
 
       return result.rows[0] || null;
     } catch (error) {
@@ -166,7 +172,9 @@ export abstract class BaseQueries<
    * @returns Promise resolving to the entity
    * @throws Error if entity is not found
    */
-  async get(identifier: TIdentifiers): Promise<TEntity> {
+  async get(
+    identifier: NonNullable<TConfig["Identifier"]>
+  ): Promise<TConfig["Entity"]> {
     const entity = await this.find(identifier);
 
     if (!entity) {
@@ -182,7 +190,9 @@ export abstract class BaseQueries<
    * @param identifier - Unique identifier
    * @returns Promise resolving to true if entity exists, false otherwise
    */
-  async exists(identifier: TIdentifiers): Promise<boolean> {
+  async exists(
+    identifier: NonNullable<TConfig["Identifier"]>
+  ): Promise<boolean> {
     const { whereClause, values } = this.getColumnMapping(identifier);
     const query = `SELECT EXISTS(SELECT 1 FROM ${this.table} WHERE ${whereClause})`;
 
@@ -204,7 +214,10 @@ export abstract class BaseQueries<
    * @returns Promise resolving when the update is complete
    * @throws Error if no entity is found with the specified identifier
    */
-  async update(identifier: TIdentifiers, updates: TUpdate): Promise<void> {
+  async update(
+    identifier: NonNullable<TConfig["Identifier"]>,
+    updates: Partial<NonNullable<TConfig["Update"]>>
+  ): Promise<void> {
     const { whereClause, values: identifierValues } =
       this.getColumnMapping(identifier);
     const updateMappings = this.getUpdateMapping(updates);
@@ -242,9 +255,9 @@ export abstract class BaseQueries<
    * @throws Error if no entity is found with the specified identifier
    */
   async updateAndReturn(
-    identifier: TIdentifiers,
-    updates: TUpdate
-  ): Promise<TEntity> {
+    identifier: NonNullable<TConfig["Identifier"]>,
+    updates: Partial<NonNullable<TConfig["Update"]>>
+  ): Promise<TConfig["Entity"]> {
     const { whereClause, values: identifierValues } =
       this.getColumnMapping(identifier);
     const updateMappings = this.getUpdateMapping(updates);
@@ -263,7 +276,7 @@ export abstract class BaseQueries<
     const params = [...identifierValues, ...updateMappings.map((m) => m.value)];
 
     try {
-      const result = await this.db.query<TEntity>(query, params);
+      const result = await this.db.query<TConfig["Entity"]>(query, params);
 
       if (result.rowCount === 0) {
         throw createNotFoundError(this.table, identifier);
@@ -283,7 +296,7 @@ export abstract class BaseQueries<
    * @returns Promise resolving when the deletion is complete
    * @throws Error if no entity is found with the specified identifier
    */
-  async delete(identifier: TIdentifiers): Promise<void> {
+  async delete(identifier: NonNullable<TConfig["Identifier"]>): Promise<void> {
     const { whereClause, values } = this.getColumnMapping(identifier);
     const query = `DELETE FROM ${this.table} WHERE ${whereClause}`;
 
@@ -311,14 +324,14 @@ export abstract class BaseQueries<
    * @returns Promise resolving to an array of entities
    */
   async findAll(
-    filters?: Partial<TFilters>,
+    filters?: Partial<NonNullable<TConfig["Filters"]>>,
     options?: {
       limit?: number;
       offset?: number;
       orderBy?: string;
       orderDirection?: "ASC" | "DESC";
     }
-  ): Promise<TEntity[]> {
+  ): Promise<TConfig["Entity"][]> {
     const { whereClause, params } = filters
       ? this.buildFilterClause(filters)
       : { whereClause: "1=1", params: [] };
@@ -341,7 +354,7 @@ export abstract class BaseQueries<
     }
 
     try {
-      const result = await this.db.query<TEntity>(query, params);
+      const result = await this.db.query<TConfig["Entity"]>(query, params);
       return result.rows;
     } catch (error) {
       logger.error(`Failed to find all ${this.table}:`, error);
@@ -358,8 +371,8 @@ export abstract class BaseQueries<
    * @returns Promise resolving to the number of rows affected
    */
   async updateAll(
-    updates: TUpdate,
-    filters?: Partial<TFilters>
+    updates: Partial<NonNullable<TConfig["Update"]>>,
+    filters?: Partial<NonNullable<TConfig["Filters"]>>
   ): Promise<number> {
     const { whereClause, params } = filters
       ? this.buildFilterClause(filters)
@@ -396,7 +409,9 @@ export abstract class BaseQueries<
    * @param filters - Filter criteria to match specific entities (required)
    * @returns Promise resolving to the number of rows affected
    */
-  async deleteAll(filters: Partial<TFilters>): Promise<number> {
+  async deleteAll(
+    filters: Partial<NonNullable<TConfig["Filters"]>>
+  ): Promise<number> {
     if (!filters || Object.keys(filters).length === 0) {
       throw new Error(
         `deleteAll requires at least one filter. Use drop() to delete all records from ${this.table}`
@@ -480,7 +495,7 @@ export abstract class BaseQueries<
    * @param data - Object containing creation data
    * @returns Promise resolving when the entity is created
    */
-  async create(data: TCreate): Promise<void> {
+  async create(data: NonNullable<TConfig["Create"]>): Promise<void> {
     const createMappings = this.getCreateMapping(data);
 
     const columns = createMappings.map((m) => m.column).join(", ");
@@ -506,7 +521,9 @@ export abstract class BaseQueries<
    * @param data - Object containing creation data
    * @returns Promise resolving to the created entity
    */
-  async createAndReturn(data: TCreate): Promise<TEntity> {
+  async createAndReturn(
+    data: NonNullable<TConfig["Create"]>
+  ): Promise<TConfig["Entity"]> {
     const createMappings = this.getCreateMapping(data);
 
     const columns = createMappings.map((m) => m.column).join(", ");
@@ -518,7 +535,7 @@ export abstract class BaseQueries<
     const query = `INSERT INTO ${this.table} (${columns}) VALUES (${placeholders}) RETURNING *`;
 
     try {
-      const result = await this.db.query<TEntity>(query, values);
+      const result = await this.db.query<TConfig["Entity"]>(query, values);
 
       return result.rows[0];
     } catch (error) {
@@ -537,10 +554,12 @@ export abstract class BaseQueries<
    * @returns Promise resolving to the upserted entity
    */
   async upsert(
-    data: TCreate,
-    conflictTarget: keyof TCreate | Array<keyof TCreate>,
-    updateFields?: Array<keyof TCreate>
-  ): Promise<TEntity> {
+    data: NonNullable<TConfig["Create"]>,
+    conflictTarget:
+      | keyof NonNullable<TConfig["Create"]>
+      | Array<keyof NonNullable<TConfig["Create"]>>,
+    updateFields?: Array<keyof NonNullable<TConfig["Create"]>>
+  ): Promise<TConfig["Entity"]> {
     const createMappings = this.getCreateMapping(data);
     const columns = createMappings.map((m) => m.column).join(", ");
     const placeholders = createMappings
@@ -570,7 +589,7 @@ export abstract class BaseQueries<
         RETURNING *`;
 
     try {
-      const result = await this.db.query<TEntity>(query, values);
+      const result = await this.db.query<TConfig["Entity"]>(query, values);
 
       return result.rows[0];
     } catch (error) {
@@ -589,7 +608,9 @@ export abstract class BaseQueries<
    * @param filters - Optional filter criteria (can be partial)
    * @returns Promise resolving to the count
    */
-  async count(filters?: Partial<TFilters>): Promise<number> {
+  async count(
+    filters?: Partial<NonNullable<TConfig["Filters"]>>
+  ): Promise<number> {
     const { whereClause, params } = filters
       ? this.buildFilterClause(filters)
       : { whereClause: "1=1", params: [] };
@@ -614,9 +635,9 @@ export abstract class BaseQueries<
    * @param params - Query parameters
    * @returns Promise resolving to query results
    */
-  async raw(query: string, params?: any[]): Promise<TEntity[]> {
+  async raw(query: string, params?: any[]): Promise<TConfig["Entity"][]> {
     try {
-      const result = await this.db.query<TEntity>(query, params);
+      const result = await this.db.query<TConfig["Entity"]>(query, params);
 
       return result.rows;
     } catch (error) {
