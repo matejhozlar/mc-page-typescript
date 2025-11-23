@@ -3,15 +3,16 @@ import type { Ticket, TicketCreate } from "./types";
 import logger from "@/logger";
 import { createNotFoundError } from "@/db/utils/query-helpers";
 import { BaseQueries } from "../base.queries";
+import { TicketCounterQueries } from "./counter";
 
 type Identifier =
   | { id: number }
   | { ticketNumber: number }
   | { channelId: string }
-  | { adminMessageId: string };
+  | { adminMessageId: string }
+  | { discordId: string };
 
 type Filters = {
-  discordId: string;
   mcName: string;
   status: string;
   createdAt: Date;
@@ -37,6 +38,8 @@ export class TicketQueries extends BaseQueries<{
   Create: TicketCreate;
 }> {
   protected readonly table = "tickets";
+
+  private _counter?: TicketCounterQueries;
 
   constructor(db: Pool) {
     super(db);
@@ -92,24 +95,10 @@ export class TicketQueries extends BaseQueries<{
     }
   }
 
-  /**
-   * Atomically increments and retrieves the next sequential ticket number from the counter
-   *
-   * @returns Promise resolving to the next available ticket number
-   * @throws Error if the ticket counter update fails
-   */
-  async next(): Promise<number> {
-    const result = await this.db.query<{ last_number: number }>(
-      `UPDATE ticket_counter
-       SET last_number = last_number + 1
-       WHERE id = 1
-       RETURNING last_number`
-    );
-
-    if (result.rowCount === 0) {
-      throw new Error("Failed to get next ticket number");
+  get counter(): TicketCounterQueries {
+    if (!this._counter) {
+      this._counter = new TicketCounterQueries(this.db);
     }
-
-    return result.rows[0].last_number;
+    return this._counter;
   }
 }

@@ -2,7 +2,7 @@
  * Database row type for the pending_shops table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface PendingShop {
+export interface ShopPending {
   id: number;
   /** Foreign key to companies table */
   company_id: number | null;
@@ -14,7 +14,7 @@ export interface PendingShop {
   logo_url: string | null;
   banner_url: string | null;
   gallery_urls: any | null;
-  created_at: Date | null;
+  created_at: Date;
   status: string | null;
   reviewed_at: Date | null;
   /** Foreign key to users table */

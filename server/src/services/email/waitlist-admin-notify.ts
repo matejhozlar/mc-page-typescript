@@ -13,7 +13,7 @@ import type {
   WaitlistSubmission,
   AutoInviteResult,
   InviteResult,
-} from "@/types/models/waitlist.types";
+} from "@/db/queries/waitlist";
 import { isSendableChannel } from "@/discord/utils/channel-guard";
 import { createAdminPanelLink } from "./utils/button.utils";
 

@@ -3,7 +3,7 @@ import type { Server as SocketIOServer } from "socket.io";
 import type { Client } from "discord.js";
 import logger from "@/logger";
 import { sendMessage } from "@/discord/utils/send-to-channel";
-import { chatTokenQueries } from "@/db";
+import { chat } from "@/db";
 
 const COOLDOWN_MS = 10_000;
 
@@ -52,14 +52,7 @@ export default async function chatMessageHandler(
     let displayName = authorName || "web";
 
     if (token !== "admin" && token !== "user") {
-      const chatToken = await chatTokenQueries.validate(token);
-
-      if (!chatToken) {
-        logger.warn("Invalid/expired token used");
-        return;
-      }
-
-      displayName = chatToken.discord_name;
+      displayName = await chat.token.validate(token);
     }
 
     const formattedMessage = `<${displayName}> ${message}`;

@@ -1,5 +1,5 @@
 import logger from "@/logger";
-import { userTokenQueries, userPortfolioQueries } from "@/db";
+import { users } from "@/db";
 
 /**
  * Service for managing user portfolio snapshots
@@ -15,10 +15,11 @@ export class PortfolioSnapshotService {
    */
   async snapshotUser(discordId: string): Promise<string> {
     try {
-      const totalValue = await userTokenQueries.calculatePortfolioValue(
-        discordId
-      );
-      await userPortfolioQueries.create(discordId, totalValue);
+      const totalValue = await users.portfolio.value(discordId);
+      await users.portfolio.create({
+        discord_id: discordId,
+        total_value: totalValue,
+      });
 
       logger.info(`Portfolio snapshot created for ${discordId}: ${totalValue}`);
 
@@ -39,7 +40,7 @@ export class PortfolioSnapshotService {
    */
   async snapshotAllUsers(): Promise<number> {
     try {
-      const userIds = await userTokenQueries.findUsersWithTokens();
+      const userIds = await users.token.findHolders();
 
       if (userIds.length === 0) {
         logger.info("No users with token holdings found for snapshot");
@@ -78,7 +79,10 @@ export class PortfolioSnapshotService {
    * @returns Promise resolving to array of portfolio history entires
    */
   async getUserHistory(discordId: string, limit?: number) {
-    return userPortfolioQueries.getHistory(discordId, limit);
+    return await users.portfolio.findAll(
+      { discordId },
+      { orderBy: "recorded_at", orderDirection: "DESC", limit: limit }
+    );
   }
 
   /**
@@ -88,7 +92,10 @@ export class PortfolioSnapshotService {
    * @returns Promise resolving to the most recent portfolio entry
    */
   async getUserLatest(discordId: string) {
-    return userPortfolioQueries.getLatest(discordId);
+    return await users.portfolio.findAll(
+      { discordId },
+      { orderBy: "recorded_at", orderDirection: "DESC", limit: 1 }
+    );
   }
 
   /**
@@ -98,6 +105,6 @@ export class PortfolioSnapshotService {
    * @returns Promise resolving to the number of deleted entries
    */
   async cleanup(daysToKeep?: number) {
-    return userPortfolioQueries.cleanup(daysToKeep);
+    return await users.portfolio.cleanup(daysToKeep);
   }
 }

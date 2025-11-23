@@ -1,6 +1,7 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
 import { ShopEdit } from "./types";
+import { ShopEditRejectedQueries } from "./rejected";
 
 type Identifier = { id: string };
 
@@ -32,7 +33,16 @@ export class ShopEditQueries extends BaseQueries<{
 }> {
   protected readonly table = "shop_edits";
 
+  private _rejected?: ShopEditRejectedQueries;
+
   constructor(db: Pool) {
     super(db);
+  }
+
+  get rejected(): ShopEditRejectedQueries {
+    if (!this._rejected) {
+      this._rejected = new ShopEditRejectedQueries(this.db);
+    }
+    return this._rejected;
   }
 }

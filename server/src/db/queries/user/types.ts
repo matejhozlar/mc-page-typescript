@@ -8,7 +8,7 @@ export interface User {
   online: boolean;
   last_seen: Date | null;
   discord_id: string;
-  play_time_seconds: string | null;
+  play_time_seconds: string;
   session_start: Date | null;
   first_joined: Date;
 }

@@ -363,6 +363,22 @@ export abstract class BaseQueries<
   }
 
   /**
+   * Retrieves all entities from the table with optional pagination and sorting
+   * Alias for findAll() with no filters
+   *
+   * @param options - Optional pagination and sorting options
+   * @returns Promise resolving to an array of all entities
+   */
+  async getAll(options?: {
+    limit?: number;
+    offset?: number;
+    orderBy?: string;
+    orderDirection?: "ASC" | "DESC";
+  }): Promise<TConfig["Entity"][]> {
+    return this.findAll(undefined, options);
+  }
+
+  /**
    * Updates all entities matching the filter criteria
    * If no filers provided, updates ALL records in the table
    *

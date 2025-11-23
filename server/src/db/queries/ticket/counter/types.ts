@@ -6,3 +6,8 @@ export interface TicketCounter {
   id: number;
   last_number: number;
 }
+
+export interface TicketCounterCreate {
+  id?: number;
+  last_number: number;
+}

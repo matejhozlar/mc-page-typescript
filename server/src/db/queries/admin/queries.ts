@@ -2,7 +2,7 @@ import type { Pool } from "pg";
 import type { Admin, AdminCreate } from "./types";
 import { BaseQueries } from "../base.queries";
 
-type Identifier = { id: number } | { discordId: number };
+type Identifier = { id: number } | { discordId: string };
 
 type Filters = {
   vanished: boolean;

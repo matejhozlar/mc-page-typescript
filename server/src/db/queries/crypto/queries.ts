@@ -2,7 +2,7 @@ import { Pool } from "pg";
 import { CryptoTokenQueries } from "./token";
 import { CryptoTaxQueries } from "./tax";
 
-export class Crypto {
+export class CryptoQueries {
   private _token?: CryptoTokenQueries;
 
   private _tax?: CryptoTaxQueries;

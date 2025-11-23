@@ -10,8 +10,17 @@ ALTER TABLE ONLY public.tickets
 ALTER TABLE ONLY public.tickets
     ADD CONSTRAINT unique_ticker_number UNIQUE (ticket_number);
 
+ALTER TABLE ONLY public.user_balances
+    ADD CONSTRAINT unique_name UNIQUE (name);
+
+ALTER TABLE ONLY public.tickets
+    ADD CONSTRAINT unqiue_discord_id UNIQUE (discord_id);
+
 ALTER TABLE shop_images
 ALTER COLUMN shop_id SET NOT NULL;
+
+ALTER TABLE users 
+ALTER COLUMN play_time_seconds SET NOT NULL;
 
 ALTER TABLE shop_images
 ALTER COLUMN position SET NOT NULL;
@@ -22,6 +31,38 @@ ALTER COLUMN uploaded_at SET NOT NULL;
 ALTER TABLE shop_images
 ALTER COLUMN url SET NOT NULL;
 
+ALTER TABLE shop_edits_rejected
+ALTER COLUMN rejected_at SET NOT NULL;
+
+ALTER TABLE shop_pending 
+ALTER COLUMN created_at SET NOT NULL;
+
+ALTER TABLE shop_rejected
+ALTER COLUMN rejected_at SET NOT NULL;
+
+ALTER TABLE shop_rejected
+ALTER COLUMN founder_uuid SET NOT NULL;
+
+ALTER TABLE shop_rejected
+ALTER COLUMN company_id SET NOT NULL;
+
+ALTER TABLE crypto_token_alerts 
+ALTER COLUMN created_at SET NOT NULL;
+
+ALTER TABLE crypto_token_metrics 
+ALTER COLUMN recorded_at SET NOT NULL;
+
+ALTER TABLE crypto_token_metrics 
+ALTER COLUMN token_id SET NOT NULL;
+
+ALTER TABLE crypto_token_transactions 
+ALTER COLUMN timestamp SET NOT NULL;
+
+ALTER TABLE user_balances 
+ALTER COLUMN discord_id SET NOT NULL;
+
+ALTER TABLE user_balances 
+ALTER COLUMN name SET NOT NULL;
 
 ALTER TABLE shop_images
 ALTER COLUMN type SET NOT NULL;
@@ -263,6 +304,13 @@ REFERENCES users(name)
 ON DELETE CASCADE
 ON UPDATE CASCADE;
 
+ALTER TABLE user_balances
+ADD CONSTRAINT fk_user_balances_name
+FOREIGN KEY (name)
+REFERENCES users(name)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
 ALTER TABLE ai_message_log ALTER COLUMN created_at SET NOT NULL;
 ALTER TABLE admins ALTER COLUMN created_at SET NOT NULL;
 ALTER TABLE users ALTER COLUMN first_joined SET NOT NULL;
@@ -270,3 +318,25 @@ ALTER TABLE tickets ALTER COLUMN mc_name SET NOT NULL;
 ALTER TABLE admins ALTER COLUMN vanished SET NOT NULL;
 ALTER TABLE users 
 ALTER COLUMN session_start SET DEFAULT NULL;
+
+ALTER TABLE token_price_history_daily RENAME TO crypto_token_history_daily;
+
+ALTER TABLE token_price_history_hourly RENAME TO crypto_token_history_hourly;
+
+ALTER TABLE token_price_history_minutes RENAME TO crypto_token_history_minutely;
+
+ALTER TABLE token_price_history_weekly RENAME TO crypto_token_history_weekly;
+
+ALTER TABLE crypto_token_history_minutely
+ALTER COLUMN token_id SET NOT NULL;
+
+ALTER TABLE crypto_token_history_hourly
+ALTER COLUMN token_id SET NOT NULL;
+
+ALTER TABLE crypto_token_history_daily
+ALTER COLUMN token_id SET NOT NULL;
+
+ALTER TABLE crypto_token_history_weekly
+ALTER COLUMN token_id SET NOT NULL;
+
+

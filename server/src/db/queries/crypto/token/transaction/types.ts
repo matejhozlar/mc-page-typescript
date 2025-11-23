@@ -2,7 +2,7 @@
  * Database row type for the token_transactions table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface TokenTransaction {
+export interface CryptoTokenTransaction {
   id: number;
   /** Foreign key to users table */
   discord_id: string | null;
@@ -11,5 +11,13 @@ export interface TokenTransaction {
   amount: string;
   price_at_transaction: string;
   type: string;
-  timestamp: Date | null;
+  timestamp: Date;
+}
+
+export interface CryptoTokenTransactionCreate {
+  discord_id?: string;
+  token_id?: number;
+  amount: string;
+  price_at_transaction: string;
+  type: string;
 }

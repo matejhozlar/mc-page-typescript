@@ -7,7 +7,7 @@ export interface UserPortfolio {
   /** Foreign key to users table */
   discord_id: string;
   total_value: string;
-  recorded_at: Date | null;
+  recorded_at: Date;
 }
 
 export interface UserPortfolioCreate {

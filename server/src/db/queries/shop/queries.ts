@@ -5,6 +5,8 @@ import { ShopEditQueries } from "./edit";
 import { ShopImageQueries } from "./image";
 import { ShopLocationQueries } from "./location";
 import { ShopReviewQueries } from "./review";
+import { ShopPendingQueries } from "./pending";
+import { ShopRejectedQueries } from "./rejected/queries";
 
 type Identifier = { id: number };
 
@@ -36,6 +38,10 @@ export class ShopQueries extends BaseQueries<{
 
   private _review?: ShopReviewQueries;
 
+  private _pending?: ShopPendingQueries;
+
+  private _rejected?: ShopRejectedQueries;
+
   constructor(db: Pool) {
     super(db);
   }
@@ -66,5 +72,19 @@ export class ShopQueries extends BaseQueries<{
       this._review = new ShopReviewQueries(this.db);
     }
     return this._review;
+  }
+
+  get pending(): ShopPendingQueries {
+    if (!this._pending) {
+      this._pending = new ShopPendingQueries(this.db);
+    }
+    return this._pending;
+  }
+
+  get rejected(): ShopRejectedQueries {
+    if (!this._rejected) {
+      this._rejected = new ShopRejectedQueries(this.db);
+    }
+    return this._rejected;
   }
 }

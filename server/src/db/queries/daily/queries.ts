@@ -5,7 +5,7 @@ import { DailyRewardQueries } from "./reward";
 import { DailyQuestQueries } from "./quest";
 import { DailyMobLimitQueries } from "./mob/limit";
 
-export class Daily {
+export class DailyQueries {
   private _playerStats?: DailyPlayerStatQueries;
 
   private _playerPlaytime?: DailyPlayerPlaytimeQueries;

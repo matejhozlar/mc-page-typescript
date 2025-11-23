@@ -1,10 +1,11 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import type { CompanyPending } from "./types";
+import { ShopPending } from "./types";
 
 type Identifier = { id: number };
 
 type Filters = {
+  companyId: number;
   founderUuid: string;
   name: string;
   description: string;
@@ -20,15 +21,12 @@ type Filters = {
   feeCheckedAt: Date;
 };
 
-type Update = Filters;
-
-export class CompanyPendingQueries extends BaseQueries<{
-  Entity: CompanyPending;
+export class ShopPendingQueries extends BaseQueries<{
+  Entity: ShopPending;
   Identifier: Identifier;
   Filters: Filters;
-  Update: Update;
 }> {
-  protected readonly table = "company_pending";
+  protected readonly table = "shop_pending";
 
   constructor(db: Pool) {
     super(db);

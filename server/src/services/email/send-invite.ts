@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { v4 as uuidv4 } from "uuid";
 import logger from "@/logger";
 import { createTransporter } from "./transporter";
-import type { InviteResult } from "@/types/models/waitlist.types";
+import type { InviteResult } from "@/db/queries/waitlist";
 import { waitlists } from "@/db";
 import config from "@/config";
 

@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import logger from "@/logger";
 import { tickets, users } from "@/db";
-import { TicketCreateParams } from "@/types/models/ticket.types";
+import { TicketCreate } from "@/db/queries/ticket";
 
 /**
  * Creates a new support ticket channel for the user
@@ -65,7 +65,7 @@ export default async function createTicket(
     }
 
     const mcName = await users.name({ discordId: user.id });
-    const ticketNumber = await tickets.next();
+    const ticketNumber = await tickets.counter.next();
     const ticketName = `ticket-${ticketNumber.toString().padStart(4, "0")}`;
 
     if (!mainBot.user) {
@@ -111,7 +111,7 @@ export default async function createTicket(
       ],
     });
 
-    const newTicket: TicketCreateParams = {
+    const newTicket: TicketCreate = {
       ticket_number: ticketNumber,
       discord_id: user.id,
       mc_name: mcName,

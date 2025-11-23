@@ -1,10 +1,11 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { CompanyRejected, CompanyRejectedCreate } from "./types";
+import { ShopRejected, ShopRejectedCreate } from "./types";
 
 type Identifier = { id: number };
 
 type Filters = {
+  companyId: number;
   founderUuid: string;
   name: string;
   reason: string;
@@ -13,14 +14,14 @@ type Filters = {
 
 type Update = Filters;
 
-export class CompanyRejectedQueries extends BaseQueries<{
-  Entity: CompanyRejected;
+export class ShopRejectedQueries extends BaseQueries<{
+  Entity: ShopRejected;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;
-  Create: CompanyRejectedCreate;
+  Create: ShopRejectedCreate;
 }> {
-  protected readonly table = "company_rejected";
+  protected readonly table = "shop_rejected";
 
   constructor(db: Pool) {
     super(db);

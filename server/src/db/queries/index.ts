@@ -1,0 +1,16 @@
+export { AdminQueries } from "./admin";
+export { ChatQueries } from "./chat";
+export { CompanyQueries } from "./company";
+export { CryptoQueries } from "./crypto";
+export { CurrencyQueries } from "./currency";
+export { DailyQueries } from "./daily";
+export { ItemQueries } from "./item";
+export { JobQueries } from "./job";
+export { LeaderboardQueries } from "./leaderboard";
+export { LogQueries } from "./log";
+export { LotteryQueries } from "./lottery";
+export { ShopQueries } from "./shop";
+export { SnapshotQueries } from "./snapshot";
+export { TicketQueries } from "./ticket";
+export { UserQueries } from "./user";
+export { WaitlistQueries } from "./waitlist";

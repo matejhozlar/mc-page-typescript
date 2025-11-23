@@ -11,5 +11,9 @@ export interface UserTokenCreate {
   discord_id: string;
   token_id: number;
   amount: string;
-  price_at_purchase: string;
+  price_at_purchase?: string;
+}
+
+export interface UserTokenWithPrice extends UserToken {
+  price_per_unit: string;
 }

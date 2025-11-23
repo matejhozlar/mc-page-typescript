@@ -6,14 +6,11 @@ import {
   ButtonBuilder,
   ButtonStyle,
 } from "discord.js";
-import {
-  cryptoTokenQueries,
-  tokenPriceHistoryQueries,
-  tokenPriceAlertQueries,
-} from "@/db";
+import { crypto } from "@/db";
 import { sendCrashNotification } from "@/discord/notifiers/crypto/crash-notifier";
 import config from "@/config";
 import logger from "@/logger";
+import { CryptoTokenHistoryTable } from "@/db/queries/crypto/token/history";
 
 const UPWARD_BIAS = config.crypto.memecoins.upwardBias;
 const CRASH_PRICE_THRESHOLD = config.crypto.memecoins.crashPriceThreshold;
@@ -36,7 +33,11 @@ export class MemecoinPriceService {
    */
   async updateMemecoinPrices(): Promise<void> {
     try {
-      const tokens = await cryptoTokenQueries.getActiveMemecoins();
+      // Finds all active memecoins
+      const tokens = await crypto.token.findAll({
+        isMemecoin: true,
+        crashed: undefined,
+      });
 
       for (const token of tokens) {
         const price = parseFloat(token.price_per_unit);
@@ -50,18 +51,21 @@ export class MemecoinPriceService {
         const newPrice = this.calculateNewPrice(price);
         const newPriceFormatted = newPrice.toFixed(PRICE_DECIMALS);
 
-        await cryptoTokenQueries.updatePrice(token.id, newPriceFormatted);
+        await crypto.token.update(
+          { id: token.id },
+          { pricePerUnit: newPriceFormatted }
+        );
 
         if (newPriceFormatted !== price.toFixed(PRICE_DECIMALS)) {
-          const updatedToken = await cryptoTokenQueries.findById(token.id);
+          const updatedToken = await crypto.token.get({ id: token.id });
           if (updatedToken) {
             this.io.emit("token:update", updatedToken);
           }
         }
 
-        await tokenPriceHistoryQueries.addMinuteEntry(
-          token.id,
-          newPriceFormatted
+        await crypto.token.history.createInTable(
+          CryptoTokenHistoryTable.MINUTELY,
+          { token_id: token.id, price: newPriceFormatted }
         );
         await this.checkAndTriggerAlerts(token.id, token.symbol, newPrice);
         await this.handleHourlySnapshot(token.id, newPriceFormatted);
@@ -83,12 +87,14 @@ export class MemecoinPriceService {
     id: number;
     symbol: string;
   }): Promise<void> {
-    await cryptoTokenQueries.crashMemecoin(token.id);
+    await crypto.token.crash({ id: token.id });
 
-    const crashedToken = await cryptoTokenQueries.findById(token.id);
+    const crashedToken = await crypto.token.find({ id: token.id });
     if (!crashedToken) return;
 
-    const alerts = await tokenPriceAlertQueries.findBySymbol(token.symbol);
+    const alerts = await crypto.token.alert.findAll({
+      tokenSymbol: token.symbol,
+    });
 
     for (const alert of alerts) {
       try {
@@ -104,7 +110,7 @@ export class MemecoinPriceService {
       }
     }
 
-    await tokenPriceAlertQueries.deleteBySymbol(token.symbol);
+    await crypto.token.alert.deleteAll({ tokenSymbol: token.symbol });
     await sendCrashNotification(crashedToken);
   }
 
@@ -151,7 +157,10 @@ export class MemecoinPriceService {
     symbol: string,
     newPrice: number
   ): Promise<void> {
-    const alerts = await tokenPriceAlertQueries.findByTokenId(tokenId);
+    const token = await crypto.token.find({ id: tokenId });
+    const alerts = await crypto.token.alert.findAll({
+      tokenSymbol: token?.symbol,
+    });
 
     const triggeredAlerts = alerts.filter((alert) => {
       const targetPrice = parseFloat(alert.target_price);
@@ -165,7 +174,7 @@ export class MemecoinPriceService {
     for (const alert of triggeredAlerts) {
       try {
         await this.sendAlertNotification(alert, symbol, newPrice);
-        await tokenPriceAlertQueries.delete(alert.id);
+        await crypto.token.alert.delete({ id: alert.id });
 
         logger.info(`Sent alert to ${alert.discord_id} for ${symbol}`);
 
@@ -232,12 +241,16 @@ export class MemecoinPriceService {
     tokenId: number,
     price: string
   ): Promise<void> {
-    const hasRecent = await tokenPriceHistoryQueries.hasRecentHourlySnapshot(
+    const hasRecent = await crypto.token.history.hasRecent(
+      CryptoTokenHistoryTable.HOURLY,
       tokenId
     );
 
     if (!hasRecent) {
-      await tokenPriceHistoryQueries.addHourlyEntry(tokenId, price);
+      await crypto.token.history.createInTable(CryptoTokenHistoryTable.HOURLY, {
+        token_id: tokenId,
+        price: price,
+      });
     }
   }
 
@@ -248,12 +261,10 @@ export class MemecoinPriceService {
    * @returns Promise resolving when old entries are trimmed
    */
   private async trimOldHistoryEntries(tokenId: number): Promise<void> {
-    const oldEntry = await tokenPriceHistoryQueries.getOldestMinuteEntry(
-      tokenId
-    );
+    const oldEntry = await crypto.token.history.getOldestMinuteEntry(tokenId);
 
     if (oldEntry) {
-      await tokenPriceHistoryQueries.deleteOldestMinutesEntries(tokenId, 20);
+      await crypto.token.history.deleteOldestMinutesEntries(tokenId, 20);
     }
   }
 }

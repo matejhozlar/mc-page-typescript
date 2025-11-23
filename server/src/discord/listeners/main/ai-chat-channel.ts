@@ -2,9 +2,9 @@ import type { Client, Message } from "discord.js";
 import { assistantService } from "@/services/ai";
 import logger from "@/logger";
 import { requireProduction } from "@/utils/guard/run-guard";
-import { users, aiMessageLogQueries } from "@/db";
+import { users, logs } from "@/db";
 import { isDMChannel } from "@/discord/utils/channel-guard";
-import type { AiMessageLogCreateParams } from "@/types/models/ai-message-log.types";
+import type { LogAiCreate } from "@/db/queries/log/ai";
 import config from "@/config";
 
 const DAILY_LIMIT = config.services.ai.dailyLimit;
@@ -37,7 +37,7 @@ export default function setupAIChatListener(mainBot: Client): void {
         return;
       }
 
-      const messageCount = await aiMessageLogQueries.getToday(userId);
+      const messageCount = await logs.ai.countToday(userId);
 
       if (messageCount >= DAILY_LIMIT) {
         await message.reply(
@@ -50,12 +50,12 @@ export default function setupAIChatListener(mainBot: Client): void {
       const response = await assistantService.ask(message.content);
       await message.reply(response);
 
-      const params: AiMessageLogCreateParams = {
+      const params: LogAiCreate = {
         discord_id: userId,
         message: message.content,
       };
 
-      await aiMessageLogQueries.create(params);
+      await logs.ai.create(params);
     } catch (error) {
       logger.error("AI chat error:", error);
       await message.reply("⚠️ The assistant encountered an error.");
