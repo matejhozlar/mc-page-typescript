@@ -20,39 +20,6 @@ import { createAdminPanelLink } from "./utils/button.utils";
 const { LIME_GREEN } = config.colors;
 
 /**
- * Sends an email notification to the admin about new waitlist submissions
- *
- * @param submission - The waitlist submission details
- */
-async function sendAdminEmail(submission: WaitlistSubmission): Promise<void> {
-  const { id, email, discord_name } = submission;
-
-  const mailOptions = {
-    from: `"Createrington" <${process.env.EMAIL_ADDRESS}>`,
-    to: process.env.NOTIFY_ADMIN_EMAIL,
-    subject: `📥 New Waitlist Submission: ${discord_name}`,
-    text: `New waitlist entry:\nDiscord: ${discord_name}\nEmail: ${email}`,
-    html: `
-      <p><strong>New waitlist submission received!</strong></p>
-      <ul>
-        <li><strong>ID:</strong> ${id}</li>
-        <li><strong>Discord:</strong> ${discord_name}</li>
-        <li><strong>Email:</strong> ${email}</li>
-      </ul>
-    `,
-  };
-
-  try {
-    const transporter = createTransporter();
-    await transporter.sendMail(mailOptions);
-    logger.info("Admin notified on new waitlist entry:", email);
-  } catch (error) {
-    logger.error("Failed to notify admin by email:", error);
-    throw error;
-  }
-}
-
-/**
  * Creates and embed for waitlist notifications
  *
  * @param submission - The waitlist submission details

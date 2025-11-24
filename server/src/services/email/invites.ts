@@ -23,9 +23,9 @@ export async function sendInvite(id: number): Promise<InviteResult> {
       return { ok: false, code: 400, msg: "User already invited" };
     }
 
-    const { email, discord_name } = entry;
+    const { email, discord_name: discordName } = entry;
 
-    if (!discord_name) {
+    if (!discordName) {
       return {
         ok: false,
         code: 400,
@@ -36,12 +36,12 @@ export async function sendInvite(id: number): Promise<InviteResult> {
     const newToken = uuidv4();
 
     const variables: InviteTemplate = {
-      discordName: discord_name,
+      discordName: discordName,
       token: newToken,
     };
 
     const data: TemplateEmailConfig = {
-      to: entry.email,
+      to: email,
       subject: "🎉 Your Invitation to Createrington is Ready!",
       attachments: [
         {

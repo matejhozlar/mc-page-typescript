@@ -18,7 +18,7 @@ export interface WaitlistCreate {
 export interface WaitlistSubmission {
   id: number;
   email: string;
-  discord_name: string | null;
+  discordName: string | null;
 }
 
 export interface InviteResult {

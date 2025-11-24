@@ -31,16 +31,3 @@ export interface InviteTemplate {
   discordName: string;
   token: string;
 }
-
-export interface WaitlistSubmissionTemplate {
-  id: number;
-  discordName: string;
-  email: string;
-}
-
-export interface CompanySubmissionTemplate {
-  id: number;
-  name: string;
-  founderUuid: string;
-  shortDescription: string;
-}
