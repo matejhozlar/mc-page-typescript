@@ -1,6 +1,10 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { LotteryParticipant, LotteryParticipantCreate } from "./types";
+import {
+  LotteryParticipant,
+  LotteryParticipantCreate,
+  LotteryParticipantRow,
+} from "./types";
 
 type Identifier = { id: number };
 
@@ -15,6 +19,7 @@ type Update = Filters;
 
 export class LotteryParticipantQueries extends BaseQueries<{
   Entity: LotteryParticipant;
+  DbEntity: LotteryParticipantRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

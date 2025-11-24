@@ -1,5 +1,9 @@
 import { BaseQueries } from "@/db/queries/base.queries";
-import { CompanyBalanceHistory, CompanyBalanceHistoryCreate } from "./types";
+import {
+  CompanyBalanceHistory,
+  CompanyBalanceHistoryCreate,
+  CompanyBalanceHistoryRow,
+} from "./types";
 import { Pool } from "pg";
 
 type Identifier = { id: number };
@@ -14,6 +18,7 @@ type Update = Filters;
 
 export class CompanyBalanceHistoryQueries extends BaseQueries<{
   Entity: CompanyBalanceHistory;
+  DbEntity: CompanyBalanceHistoryRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

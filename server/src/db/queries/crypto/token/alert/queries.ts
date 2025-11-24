@@ -3,6 +3,7 @@ import {
   CryptoAlertDirection,
   CryptoTokenAlert,
   CryptoTokenAlertCreate,
+  CryptoTokenAlertRow,
 } from "./types";
 import { Pool } from "pg";
 
@@ -25,6 +26,7 @@ type Update = {
 
 export class CryptoTokenAlertQueries extends BaseQueries<{
   Entity: CryptoTokenAlert;
+  DbEntity: CryptoTokenAlertRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

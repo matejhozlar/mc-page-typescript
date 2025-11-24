@@ -1,6 +1,10 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { LeaderboardMessage, LeaderboardMessageCreate } from "./types";
+import {
+  LeaderboardMessage,
+  LeaderboardMessageCreate,
+  LeaderboardMessageRow,
+} from "./types";
 
 type Identifier = { id: number } | { type: string };
 
@@ -13,6 +17,7 @@ type Update = Filters;
 
 export class LeaderboardMessageQueries extends BaseQueries<{
   Entity: LeaderboardMessage;
+  DbEntity: LeaderboardMessageRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

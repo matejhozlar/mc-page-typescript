@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { UserBalance, UserBalanceCreate } from "./types";
+import { UserBalance, UserBalanceCreate, UserBalanceRow } from "./types";
 
 type Identifier = { discordId: string } | { uuid: string } | { name: string };
 
@@ -13,6 +13,7 @@ type Update = Filters;
 
 export class UserBalanceQueries extends BaseQueries<{
   Entity: UserBalance;
+  DbEntity: UserBalanceRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

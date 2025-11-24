@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { ShopRejected, ShopRejectedCreate } from "./types";
+import { ShopRejected, ShopRejectedCreate, ShopRejectedRow } from "./types";
 
 type Identifier = { id: number };
 
@@ -16,6 +16,7 @@ type Update = Filters;
 
 export class ShopRejectedQueries extends BaseQueries<{
   Entity: ShopRejected;
+  DbEntity: ShopRejectedRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

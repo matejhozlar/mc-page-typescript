@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { JobHistory, JobHistoryCreate } from "./types";
+import { JobHistory, JobHistoryCreate, JobHistoryRow } from "./types";
 
 type Identifier = { id: number } | { jobName: string };
 
@@ -10,6 +10,7 @@ type Update = Filters;
 
 export class JobHistoryQueries extends BaseQueries<{
   Entity: JobHistory;
+  DbEntity: JobHistoryRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

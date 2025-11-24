@@ -9,6 +9,10 @@ export interface UserTokenRow {
   price_at_purchase: string | null;
 }
 
+export interface UserTokenWithPriceRow extends UserTokenRow {
+  price_per_unit: string;
+}
+
 export type UserToken = CamelCaseKeys<UserTokenRow>;
 
 export interface UserTokenCreate {
@@ -18,6 +22,4 @@ export interface UserTokenCreate {
   priceAtPurchase?: string;
 }
 
-export interface UserTokenWithPrice extends UserToken {
-  pricePerUnit: string;
-}
+export type UserTokenWithPrice = CamelCaseKeys<UserTokenWithPriceRow>;

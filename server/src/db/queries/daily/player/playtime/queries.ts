@@ -1,5 +1,9 @@
 import { BaseQueries } from "@/db/queries/base.queries";
-import { DailyPlayerPlaytime, DailyPlayerPlaytimeCreate } from "./types";
+import {
+  DailyPlayerPlaytime,
+  DailyPlayerPlaytimeCreate,
+  DailyPlayerPlaytimeRow,
+} from "./types";
 import { Pool } from "pg";
 
 type Identifier = { uuid: string } | { playDate: Date };
@@ -13,6 +17,7 @@ type Update = {
 
 export class DailyPlayerPlaytimeQueries extends BaseQueries<{
   Entity: DailyPlayerPlaytime;
+  DbEntity: DailyPlayerPlaytimeRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

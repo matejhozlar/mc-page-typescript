@@ -1,5 +1,9 @@
 import { BaseQueries } from "@/db/queries/base.queries";
-import { ItemCategoryMap, ItemCategoryMapCreate } from "./types";
+import {
+  ItemCategoryMap,
+  ItemCategoryMapCreate,
+  ItemCategoryMapRow,
+} from "./types";
 import { Pool } from "pg";
 
 type Identifier = {
@@ -9,6 +13,7 @@ type Identifier = {
 
 export class ItemCategoryMapQueries extends BaseQueries<{
   Entity: ItemCategoryMap;
+  DbEntity: ItemCategoryMapRow;
   Identifier: Identifier;
   Create: ItemCategoryMapCreate;
 }> {

@@ -1,5 +1,5 @@
 import { BaseQueries } from "../base.queries";
-import { User, UserCreate } from "./types";
+import { User, UserCreate, UserRow } from "./types";
 import { Pool } from "pg";
 import { UserBalanceQueries } from "./balance";
 import { UserPortfolioQueries } from "./portfolio";
@@ -19,6 +19,7 @@ type Update = Filters;
 
 export class UserQueries extends BaseQueries<{
   Entity: User;
+  DbEntity: UserRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

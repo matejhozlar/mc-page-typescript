@@ -1,5 +1,5 @@
 import type { Pool } from "pg";
-import type { Ticket, TicketCreate } from "./types";
+import type { Ticket, TicketCreate, TicketRow } from "./types";
 import logger from "@/logger";
 import { createNotFoundError } from "@/db/utils/query-helpers";
 import { BaseQueries } from "../base.queries";
@@ -32,6 +32,7 @@ type Update = {
 
 export class TicketQueries extends BaseQueries<{
   Entity: Ticket;
+  DbEntity: TicketRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

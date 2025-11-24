@@ -47,23 +47,29 @@ export abstract class BaseQueries<
    * @param row - Database row object with snake_case keys
    * @returns Entity object with camelCase keys
    */
-  protected mapRowToEntity(row: TConfig["DbEntity"]): TConfig["Entity"] {
+  protected mapRowToEntity(row: TConfig["DbEntity"]): TConfig["Entity"];
+  protected mapRowToEntity<TBdRow extends Record<string, any>, TEntity>(
+    row: TBdRow
+  ): TEntity;
+  protected mapRowToEntity(row: any): any {
     const entity: any = {};
     for (const [key, value] of Object.entries(row)) {
       entity[this.snakeToCamel(key)] = value;
     }
-    return entity as TConfig["Entity"];
+    return entity;
   }
 
   /**
-   * Converts multiple Database rows from snake_case to camelCase
+   * Converts multiple database rows from snake_case to camelCase
    *
    * @param rows - Array of database row objects with snake_case keys
-   * @returns Array of entity objects with camelCase keys
+   * @returns Array of entitiy objects with camelCase keys
    */
-  protected mapRowsToEntities(
-    rows: TConfig["DbEntity"][]
-  ): TConfig["Entity"][] {
+  protected mapRowsToEntities(rows: TConfig["DbEntity"][]): TConfig["Entity"][];
+  protected mapRowsToEntities<TDbRow extends Record<string, any>, TEntity>(
+    rows: TDbRow[]
+  ): TEntity[];
+  protected mapRowsToEntities(rows: any[]): any[] {
     return rows.map((row) => this.mapRowToEntity(row));
   }
 

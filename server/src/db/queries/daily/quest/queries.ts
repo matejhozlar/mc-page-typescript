@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { DailyQuest, DailyQuestCreate } from "./types";
+import { DailyQuest, DailyQuestCreate, DailyQuestRow } from "./types";
 
 type Identifier =
   | { id: number }
@@ -19,6 +19,7 @@ type Update = Filters;
 
 export class DailyQuestQueries extends BaseQueries<{
   Entity: DailyQuest;
+  DbEntity: DailyQuestRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

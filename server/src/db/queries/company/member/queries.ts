@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { CompanyMember, CompanyMemberCreate } from "./types";
+import { CompanyMember, CompanyMemberCreate, CompanyMemberRow } from "./types";
 
 type Identifier = { userUuid: string } | { companyId: number };
 
@@ -13,6 +13,7 @@ type Update = Filters;
 
 export class CompanyMemberQueries extends BaseQueries<{
   Entity: CompanyMember;
+  DbEntity: CompanyMemberRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

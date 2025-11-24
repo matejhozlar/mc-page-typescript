@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../base.queries";
-import { Item } from "./types";
+import { Item, ItemRow } from "./types";
 import { ItemCategoryQueries } from "./category";
 
 type Identifier = { id: number };
@@ -21,6 +21,7 @@ type Filters = {
 
 export class ItemQueries extends BaseQueries<{
   Entity: Item;
+  DbEntity: ItemRow;
   Identifier: Identifier;
   Filters: Filters;
 }> {

@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { LogRcon } from "./types";
+import { LogRcon, LogRconRow } from "./types";
 
 type Identifier = { id: number };
 
@@ -15,6 +15,7 @@ type Update = Filters;
 
 export class LogRconQueries extends BaseQueries<{
   Entity: LogRcon;
+  DbEntity: LogRconRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

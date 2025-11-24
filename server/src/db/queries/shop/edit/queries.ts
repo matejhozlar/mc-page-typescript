@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { ShopEdit } from "./types";
+import { ShopEdit, ShopEditRow } from "./types";
 import { ShopEditRejectedQueries } from "./rejected";
 
 type Identifier = { id: string };
@@ -27,6 +27,7 @@ type Update = Filters;
 
 export class ShopEditQueries extends BaseQueries<{
   Entity: ShopEdit;
+  DbEntity: ShopEditRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

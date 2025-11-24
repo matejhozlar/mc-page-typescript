@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { DailyReward, DailyRewardCreate } from "./types";
+import { DailyReward, DailyRewardCreate, DailyRewardRow } from "./types";
 
 type Identifier = { discordId: string };
 
@@ -10,6 +10,7 @@ type Update = Filters;
 
 export class DailyRewardQueries extends BaseQueries<{
   Entity: DailyReward;
+  DbEntity: DailyRewardRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

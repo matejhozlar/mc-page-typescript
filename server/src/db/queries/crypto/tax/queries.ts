@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { CryptoTax } from "./types";
+import { CryptoTax, CryptoTaxRow } from "./types";
 
 type Identifier = { id: number };
 
@@ -10,6 +10,7 @@ type Update = Filters;
 
 export class CryptoTaxQueries extends BaseQueries<{
   Entity: CryptoTax;
+  DbEntity: CryptoTaxRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { UserPortfolio, UserPortfolioCreate } from "./types";
-import { UserTokenWithPrice } from "../token";
+import { UserPortfolio, UserPortfolioCreate, UserPortfolioRow } from "./types";
+import { UserTokenWithPrice, UserTokenWithPriceRow } from "../token";
 import logger from "@/logger";
 
 type Identifier = { id: number };
@@ -12,6 +12,7 @@ type Update = Filters;
 
 export class UserPortfolioQueries extends BaseQueries<{
   Entity: UserPortfolio;
+  DbEntity: UserPortfolioRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;
@@ -30,7 +31,7 @@ export class UserPortfolioQueries extends BaseQueries<{
    * @returns Promise resolving to an array of tokens with current prices
    */
   async findWithPrices(discordId: string): Promise<UserTokenWithPrice[]> {
-    const result = await this.db.query<UserTokenWithPrice>(
+    const result = await this.db.query<UserTokenWithPriceRow>(
       `SELECT ut.discord_id, ut.token_id, ut.amount, ut.price_at_purchase, ct.price_per_unit
        FROM user_tokens ut
        JOIN crypto_tokens ct ON ut.token_id = ct.id
@@ -38,7 +39,9 @@ export class UserPortfolioQueries extends BaseQueries<{
       [discordId]
     );
 
-    return result.rows;
+    return this.mapRowsToEntities<UserTokenWithPriceRow, UserTokenWithPrice>(
+      result.rows
+    );
   }
 
   /**
@@ -51,7 +54,7 @@ export class UserPortfolioQueries extends BaseQueries<{
     const tokens = await this.findWithPrices(discordId);
 
     const totalValue = tokens.reduce((sum, token) => {
-      return sum + parseFloat(token.amount) * parseFloat(token.price_per_unit);
+      return sum + parseFloat(token.amount) * parseFloat(token.pricePerUnit);
     }, 0);
 
     return totalValue.toFixed(2);

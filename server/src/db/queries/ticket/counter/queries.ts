@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { TicketCounter, TicketCounterCreate } from "./types";
+import { TicketCounter, TicketCounterCreate, TicketCounterRow } from "./types";
 
 type Identifier = { id: number };
 
@@ -14,6 +14,7 @@ type Update = {
 
 export class TicketCounterQueries extends BaseQueries<{
   Entity: TicketCounter;
+  DbEntity: TicketCounterRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

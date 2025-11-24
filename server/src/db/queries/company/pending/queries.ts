@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import type { CompanyPending } from "./types";
+import type { CompanyPending, CompanyPendingRow } from "./types";
 
 type Identifier = { id: number };
 
@@ -24,6 +24,7 @@ type Update = Filters;
 
 export class CompanyPendingQueries extends BaseQueries<{
   Entity: CompanyPending;
+  DbEntity: CompanyPendingRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

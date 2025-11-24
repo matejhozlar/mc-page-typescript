@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../base.queries";
-import { Shop, ShopCreate } from "./types";
+import { Shop, ShopCreate, ShopRow } from "./types";
 import { ShopEditQueries } from "./edit";
 import { ShopImageQueries } from "./image";
 import { ShopLocationQueries } from "./location";
@@ -23,6 +23,7 @@ type Update = Filters;
 
 export class ShopQueries extends BaseQueries<{
   Entity: Shop;
+  DbEntity: ShopRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

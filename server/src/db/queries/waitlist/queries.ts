@@ -1,5 +1,5 @@
 import type { Pool } from "pg";
-import type { Waitlist, WaitlistCreate } from "./types";
+import type { Waitlist, WaitlistCreate, WaitlistRow } from "./types";
 import { BaseQueries } from "../base.queries";
 
 type Identifier = { id: number } | { email: string };
@@ -14,6 +14,7 @@ type Update = Filters;
 
 export class WaitlistQueries extends BaseQueries<{
   Entity: Waitlist;
+  DbEntity: WaitlistRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

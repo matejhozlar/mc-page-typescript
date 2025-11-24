@@ -1,5 +1,5 @@
 import type { Pool } from "pg";
-import type { LogAi, LogAiCreate } from "./types";
+import type { LogAi, LogAiCreate, LogAiRow } from "./types";
 import { BaseQueries } from "../../base.queries";
 
 type Identifier = { id: number };
@@ -12,6 +12,7 @@ type Filters = {
 
 export class LogAiQueries extends BaseQueries<{
   Entity: LogAi;
+  DbEntity: LogAiRow;
   Identifier: Identifier;
   Filters: Filters;
   Create: LogAiCreate;

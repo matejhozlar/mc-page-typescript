@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { ShopImage, ShopImageCreate } from "./types";
+import { ShopImage, ShopImageCreate, ShopImageRow } from "./types";
 
 type Identifier = { id: number };
 
@@ -16,6 +16,7 @@ type Update = Filters;
 
 export class ShopImageQueries extends BaseQueries<{
   Entity: ShopImage;
+  DbEntity: ShopImageRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

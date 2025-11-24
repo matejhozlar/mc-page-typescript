@@ -2,6 +2,7 @@ import { Pool } from "pg";
 import {
   CryptoTokenHistory,
   CryptoTokenHistoryCreate,
+  CryptoTokenHistoryRow,
   CryptoTokenHistoryTable,
 } from "./types";
 import { BaseQueries } from "@/db/queries/base.queries";
@@ -17,6 +18,7 @@ type Filters = {
 
 export class CryptoTokenHistoryQueries extends BaseQueries<{
   Entity: CryptoTokenHistory;
+  DbEntity: CryptoTokenHistoryRow;
   Identifier: Identifier;
   Filters: Filters;
   Create: CryptoTokenHistoryCreate;
@@ -96,7 +98,7 @@ export class CryptoTokenHistoryQueries extends BaseQueries<{
     tokenId: number,
     limit: number = 100
   ): Promise<CryptoTokenHistory | null> {
-    const result = await this.db.query<CryptoTokenHistory>(
+    const result = await this.db.query<CryptoTokenHistoryRow>(
       `SELECT id, token_id, price, recorded_at
        FROM token_price_history_minutes
        WHERE token_id = $1
@@ -104,8 +106,7 @@ export class CryptoTokenHistoryQueries extends BaseQueries<{
        LIMIT 1 OFFSET $2`,
       [tokenId, limit - 1]
     );
-
-    return result.rows[0] || null;
+    return result.rows[0] ? this.mapRowToEntity(result.rows[0]) : null;
   }
 
   /**

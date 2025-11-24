@@ -1,5 +1,5 @@
 import type { Pool } from "pg";
-import type { Admin, AdminCreate } from "./types";
+import type { Admin, AdminCreate, AdminRow } from "./types";
 import { BaseQueries } from "../base.queries";
 
 type Identifier = { id: number } | { discordId: string };
@@ -13,6 +13,7 @@ type Update = { vanished: boolean };
 
 export class AdminQueries extends BaseQueries<{
   Entity: Admin;
+  DbEntity: AdminRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

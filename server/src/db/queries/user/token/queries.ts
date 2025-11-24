@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { UserToken, UserTokenCreate } from "./types";
+import { UserToken, UserTokenCreate, UserTokenRow } from "./types";
 
 type Identifier = { discordId: string } | { tokenId: number };
 
@@ -13,6 +13,7 @@ type Update = Filters;
 
 export class UserTokenQueries extends BaseQueries<{
   Entity: UserToken;
+  DbEntity: UserTokenRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

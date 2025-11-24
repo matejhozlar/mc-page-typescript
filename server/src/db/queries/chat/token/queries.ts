@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { ChatToken, ChatTokenCreate } from "./types";
+import { ChatToken, ChatTokenCreate, ChatTokenRow } from "./types";
 import logger from "@/logger";
 
 type Identifier = { token: string } | { discordId: string };
@@ -19,6 +19,7 @@ type Update = {
 
 export class ChatTokenQueries extends BaseQueries<{
   Entity: ChatToken;
+  DbEntity: ChatTokenRow;
   Identifier: Identifier;
   Filters: Filters;
   Create: ChatTokenCreate;

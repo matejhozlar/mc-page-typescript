@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { BaseQueries } from "../../base.queries";
-import { CryptoToken, CryptoTokenCreate } from "./types";
+import { CryptoToken, CryptoTokenCreate, CryptoTokenRow } from "./types";
 import { CryptoTokenAlertQueries } from "./alert";
 import { CryptoTokenMetricQueries } from "./metric";
 import { CryptoTokenTransactionQueries } from "./transaction";
@@ -24,6 +24,7 @@ type Update = Filters;
 
 export class CryptoTokenQueries extends BaseQueries<{
   Entity: CryptoToken;
+  DbEntity: CryptoTokenRow;
   Identifier: Identifier;
   Filters: Filters;
   Update: Update;

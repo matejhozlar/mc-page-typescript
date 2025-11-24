@@ -7,8 +7,8 @@ import { CamelCaseKeys } from "@/types/common";
 export interface UserPortfolioRow {
   id: number;
   /** Foreign key to users table */
-  discord_id: string;
-  total_value: string;
+  discordId: string;
+  totalValue: string;
   recorded_at: Date;
 }
 
