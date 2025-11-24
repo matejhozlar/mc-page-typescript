@@ -58,7 +58,7 @@ export class EmailService {
    * @param variables - Object containing variable values
    * @returns Template with variables replaced
    */
-  private interpolateTemplate(
+  private interpolate(
     template: string,
     variables: Record<string, any>
   ): string {
@@ -152,7 +152,7 @@ export class EmailService {
 
     try {
       const templateContent = await this.load(template);
-      const html = this.interpolateTemplate(templateContent, variables);
+      const html = this.interpolate(templateContent, variables);
       const text = this.htmlToText(html);
 
       await this.send({
