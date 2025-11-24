@@ -1,3 +1,5 @@
+import { CamelCaseKeys } from "@/types/common";
+
 export const CryptoAlertDirection = {
   ABOVE: "above",
   UNDER: "under",
@@ -10,7 +12,7 @@ export type CryptoAlertDirection =
  * Database row type for the token_price_alerts table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface CryptoTokenAlert {
+export interface CryptoTokenAlertRow {
   id: number;
   /** Foreign key to users table */
   discord_id: string;
@@ -21,9 +23,11 @@ export interface CryptoTokenAlert {
   direction: CryptoAlertDirection;
 }
 
+export type CryptoTokenAlert = CamelCaseKeys<CryptoTokenAlertRow>;
+
 export interface CryptoTokenAlertCreate {
-  discord_id: string;
-  token_symbol: string;
-  target_price: string;
+  discordId: string;
+  tokenSymbol: string;
+  targetPrice: string;
   direction?: CryptoAlertDirection;
 }

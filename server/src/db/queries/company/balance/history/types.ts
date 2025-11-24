@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the company_balance_history table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface CompanyBalanceHistory {
+export interface CompanyBalanceHistoryRow {
   id: number;
   /** Foreign key to companies table */
   company_id: number;
@@ -10,7 +12,9 @@ export interface CompanyBalanceHistory {
   recorded_at: Date;
 }
 
+export type CompanyBalanceHistory = CamelCaseKeys<CompanyBalanceHistoryRow>;
+
 export interface CompanyBalanceHistoryCreate {
-  company_id: number;
+  companyId: number;
   balance: string;
 }

@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the token_transactions table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface CryptoTokenTransaction {
+export interface CryptoTokenTransactionRow {
   id: number;
   /** Foreign key to users table */
   discord_id: string | null;
@@ -14,10 +16,12 @@ export interface CryptoTokenTransaction {
   timestamp: Date;
 }
 
+export type CryptoTokenTransaction = CamelCaseKeys<CryptoTokenTransactionRow>;
+
 export interface CryptoTokenTransactionCreate {
-  discord_id?: string;
-  token_id?: number;
+  discordId?: string;
+  tokenId?: number;
   amount: string;
-  price_at_transaction: string;
+  priceAtTransaction: string;
   type: string;
 }

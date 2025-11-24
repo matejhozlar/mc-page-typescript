@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the company_images table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface CompanyImage {
+export interface CompanyImageRow {
   id: number;
   /** Foreign key to companies table */
   company_id: number;
@@ -12,10 +14,12 @@ export interface CompanyImage {
   uploaded_at: Date;
 }
 
+export type CompanyImage = CamelCaseKeys<CompanyImageRow>;
+
 export interface CompanyImageCreate {
-  company_id: number;
+  companyId: number;
   url: string;
   type: string;
   position?: number;
-  uploaded_at?: Date;
+  uploadedAt?: Date;
 }

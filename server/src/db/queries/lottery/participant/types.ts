@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the lottery_participants table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface LotteryParticipant {
+export interface LotteryParticipantRow {
   id: number;
   /** Foreign key to users table */
   uuid: string;
@@ -10,6 +12,8 @@ export interface LotteryParticipant {
   amount: number;
   joined_at: Date;
 }
+
+export type LotteryParticipant = CamelCaseKeys<LotteryParticipantRow>;
 
 export interface LotteryParticipantCreate {
   uuid: string;

@@ -23,7 +23,7 @@ export async function sendInvite(id: number): Promise<InviteResult> {
       return { ok: false, code: 400, msg: "User already invited" };
     }
 
-    const { email, discord_name: discordName } = entry;
+    const { email, discordName } = entry;
 
     if (!discordName) {
       return {

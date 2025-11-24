@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the users table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface User {
+export interface UserRow {
   uuid: string;
   name: string;
   online: boolean;
@@ -12,6 +14,8 @@ export interface User {
   session_start: Date | null;
   first_joined: Date;
 }
+
+export type User = CamelCaseKeys<UserRow>;
 
 export interface UserCreate {
   uuid: string;

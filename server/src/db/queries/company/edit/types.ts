@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the company_edits table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface CompanyEdit {
+export interface CompanyEditRow {
   id: number;
   /** Foreign key to companies table */
   company_id: number | null;
@@ -24,16 +26,18 @@ export interface CompanyEdit {
   reason: string | null;
 }
 
+export type CompanyEdit = CamelCaseKeys<CompanyEditRow>;
+
 export interface CompanyEditCreate {
-  company_id: number;
-  editor_uuid: string;
+  companyId: number;
+  editorUuid: string;
   name?: string;
   description?: string;
-  short_description?: string;
-  logo_path?: string;
-  gallery_paths?: string[];
+  shortDescription?: string;
+  logoPath?: string;
+  galleryPaths?: string[];
   status?: string;
-  reviewed_by: string;
-  fee_required?: string;
+  reviewedBy: string;
+  feeRequired?: string;
   reason: string;
 }

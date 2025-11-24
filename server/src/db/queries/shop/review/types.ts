@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the shop_reviews table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface ShopReview {
+export interface ShopReviewRow {
   id: string;
   /** Foreign key to shops table */
   shop_id: number;
@@ -13,9 +15,11 @@ export interface ShopReview {
   created_at: Date;
 }
 
+export type ShopReview = CamelCaseKeys<ShopReviewRow>;
+
 export interface ShopReviewCreate {
-  shop_id: number;
-  user_uuid: string;
+  shopId: number;
+  userUuid: string;
   rating: number;
   review?: string;
 }

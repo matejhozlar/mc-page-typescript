@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the tickets table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface Ticket {
+export interface TicketRow {
   id: number;
   ticket_number: number;
   /** Foreign key to users table */
@@ -16,9 +18,11 @@ export interface Ticket {
   admin_message_id: string | null;
 }
 
+export type Ticket = CamelCaseKeys<TicketRow>;
+
 export interface TicketCreate {
-  ticket_number: number;
-  discord_id: string;
-  mc_name: string;
-  channel_id: string;
+  ticketNumber: number;
+  discordId: string;
+  mcName: string;
+  channelId: string;
 }

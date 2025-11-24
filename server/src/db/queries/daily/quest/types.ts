@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the daily_shared_quests table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface DailyQuest {
+export interface DailyQuestRow {
   id: number;
   quest_date: Date;
   quest_type: string;
@@ -13,11 +15,13 @@ export interface DailyQuest {
   discord_message_id: string | null;
 }
 
+export type DailyQuest = CamelCaseKeys<DailyQuestRow>;
+
 export interface DailyQuestCreate {
-  quest_type: string;
-  quest_key: string;
-  target_count: number;
-  progress_count: number;
+  questType: string;
+  questKey: string;
+  targetCount: number;
+  progressCount: number;
   description: string;
-  discord_message_id: string;
+  discordMessageId: string;
 }

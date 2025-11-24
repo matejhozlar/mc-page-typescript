@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the pending_shops table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface ShopPending {
+export interface ShopPendingRow {
   id: number;
   /** Foreign key to companies table */
   company_id: number | null;
@@ -22,3 +24,5 @@ export interface ShopPending {
   fee_required: string | null;
   fee_checked_at: Date | null;
 }
+
+export type ShopPending = CamelCaseKeys<ShopPendingRow>;

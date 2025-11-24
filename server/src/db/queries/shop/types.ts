@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the shops table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface Shop {
+export interface ShopRow {
   id: number;
   /** Foreign key to companies table */
   company_id: number;
@@ -13,10 +15,12 @@ export interface Shop {
   short_description: string | null;
 }
 
+export type Shop = CamelCaseKeys<ShopRow>;
+
 export interface ShopCreate {
-  company_id: number;
+  companyId: number;
   name: string;
   description?: string;
-  is_paid?: boolean;
-  short_description?: string;
+  isPaid?: boolean;
+  shortDescription?: string;
 }

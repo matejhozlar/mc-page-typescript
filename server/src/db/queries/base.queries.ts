@@ -9,6 +9,7 @@ import { createNotFoundError } from "../utils/query-helpers";
 export abstract class BaseQueries<
   TConfig extends {
     Entity: QueryResultRow;
+    DbEntity: QueryResultRow;
     Identifier?: Record<string, any>;
     Filters?: Record<string, any>;
     Update?: Record<string, any>;
@@ -21,13 +22,49 @@ export abstract class BaseQueries<
   constructor(protected db: Pool) {}
 
   /**
+   * Converts snake_case to camelCase
+   *
+   * @param str - String to convert to camelCase
+   * @returns Converted snake_case value
+   */
+  protected snakeToCamel(str: string): string {
+    return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+  }
+
+  /**
    * Converts camelCase to snake_case
    *
-   * @param str - String to conver to snake_case
-   * @returns - Converted camelCase value
+   * @param str - String to convert to snake_case
+   * @returns Converted camelCase value
    */
   protected camelToSnake(str: string): string {
     return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+  }
+
+  /**
+   * Converts a database row from snake_case to camelCase
+   *
+   * @param row - Database row object with snake_case keys
+   * @returns Entity object with camelCase keys
+   */
+  protected mapRowToEntity(row: TConfig["DbEntity"]): TConfig["Entity"] {
+    const entity: any = {};
+    for (const [key, value] of Object.entries(row)) {
+      entity[this.snakeToCamel(key)] = value;
+    }
+    return entity as TConfig["Entity"];
+  }
+
+  /**
+   * Converts multiple Database rows from snake_case to camelCase
+   *
+   * @param rows - Array of database row objects with snake_case keys
+   * @returns Array of entity objects with camelCase keys
+   */
+  protected mapRowsToEntities(
+    rows: TConfig["DbEntity"][]
+  ): TConfig["Entity"][] {
+    return rows.map((row) => this.mapRowToEntity(row));
   }
 
   /**
@@ -155,9 +192,9 @@ export abstract class BaseQueries<
     const query = `SELECT * FROM ${this.table} WHERE ${whereClause} LIMIT 1`;
 
     try {
-      const result = await this.db.query<TConfig["Entity"]>(query, values);
+      const result = await this.db.query<TConfig["DbEntity"]>(query, values);
 
-      return result.rows[0] || null;
+      return result.rows[0] ? this.mapRowToEntity(result.rows[0]) : null;
     } catch (error) {
       logger.error(`Failed to find ${this.table}:`, error);
       throw error;
@@ -276,13 +313,13 @@ export abstract class BaseQueries<
     const params = [...identifierValues, ...updateMappings.map((m) => m.value)];
 
     try {
-      const result = await this.db.query<TConfig["Entity"]>(query, params);
+      const result = await this.db.query<TConfig["DbEntity"]>(query, params);
 
       if (result.rowCount === 0) {
         throw createNotFoundError(this.table, identifier);
       }
 
-      return result.rows[0];
+      return this.mapRowToEntity(result.rows[0]);
     } catch (error) {
       logger.error(`Failed to update ${this.table}:`, error);
       throw error;
@@ -354,8 +391,8 @@ export abstract class BaseQueries<
     }
 
     try {
-      const result = await this.db.query<TConfig["Entity"]>(query, params);
-      return result.rows;
+      const result = await this.db.query<TConfig["DbEntity"]>(query, params);
+      return this.mapRowsToEntities(result.rows);
     } catch (error) {
       logger.error(`Failed to find all ${this.table}:`, error);
       throw error;
@@ -551,9 +588,9 @@ export abstract class BaseQueries<
     const query = `INSERT INTO ${this.table} (${columns}) VALUES (${placeholders}) RETURNING *`;
 
     try {
-      const result = await this.db.query<TConfig["Entity"]>(query, values);
+      const result = await this.db.query<TConfig["DbEntity"]>(query, values);
 
-      return result.rows[0];
+      return this.mapRowToEntity(result.rows[0]);
     } catch (error) {
       logger.error(`Failed to create ${this.table}:`, error);
       throw error;
@@ -605,9 +642,9 @@ export abstract class BaseQueries<
         RETURNING *`;
 
     try {
-      const result = await this.db.query<TConfig["Entity"]>(query, values);
+      const result = await this.db.query<TConfig["DbEntity"]>(query, values);
 
-      return result.rows[0];
+      return this.mapRowToEntity(result.rows[0]);
     } catch (error) {
       logger.error(`Failed to upsert ${this.table}:`, error);
       throw error;
@@ -653,9 +690,9 @@ export abstract class BaseQueries<
    */
   async raw(query: string, params?: any[]): Promise<TConfig["Entity"][]> {
     try {
-      const result = await this.db.query<TConfig["Entity"]>(query, params);
+      const result = await this.db.query<TConfig["DbEntity"]>(query, params);
 
-      return result.rows;
+      return this.mapRowsToEntities(result.rows);
     } catch (error) {
       logger.error(`Failed to execute raw query on ${this.table}:`, error);
       throw error;

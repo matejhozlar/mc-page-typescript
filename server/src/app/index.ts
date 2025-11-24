@@ -6,7 +6,6 @@ import { runInDevelopment } from "@/utils/guard/run-guard";
 import config from "@/config";
 import { AppDependencies } from "@/types/app/routes/dependencies";
 import { createRoutes } from "./routes";
-import { errorHandler } from "./middleware/error-handler";
 import logger from "@/logger";
 
 const limiter = rateLimit({
@@ -37,8 +36,6 @@ export function createApp(deps: AppDependencies): Express {
   } catch (error) {
     logger.error("Failed to register routes:", error);
   }
-
-  app.use(errorHandler);
 
   return app;
 }

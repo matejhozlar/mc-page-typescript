@@ -1,3 +1,5 @@
+import { CamelCaseKeys } from "@/types/common";
+
 export const CryptoTokenHistoryTable = {
   MINUTELY: "crypto_token_history_minutely",
   HOURLY: "crypto_token_history_hourly",
@@ -13,7 +15,7 @@ export type CryptoTokenHistoryTable =
  * token_price_history_hourly, token_price_history_weekly table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface CryptoTokenHistory {
+export interface CryptoTokenHistoryRow {
   id: number;
   /** Foreign key to crypto_tokens table */
   token_id: number;
@@ -21,7 +23,9 @@ export interface CryptoTokenHistory {
   recorded_at: Date;
 }
 
+export type CryptoTokenHistory = CamelCaseKeys<CryptoTokenHistoryRow>;
+
 export interface CryptoTokenHistoryCreate {
-  token_id: number;
+  tokenId: number;
   price: string;
 }

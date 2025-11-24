@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the token_metrics table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface CryptoTokenMetric {
+export interface CryptoTokenMetricRow {
   id: number;
   /** Foreign key to crypto_tokens table */
   token_id: number;
@@ -11,8 +13,10 @@ export interface CryptoTokenMetric {
   recorded_at: Date;
 }
 
+export type CryptoTokenMetric = CamelCaseKeys<CryptoTokenMetricRow>;
+
 export interface CryptoTokenMetricCreate {
-  token_id: number;
+  tokenId: number;
   snapshot: string;
-  last_price: string;
+  lastPrice: string;
 }

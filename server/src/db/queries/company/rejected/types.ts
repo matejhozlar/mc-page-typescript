@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the rejected_companies table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface CompanyRejected {
+export interface CompanyRejectedRow {
   id: number;
   /** Foreign key to users table */
   founder_uuid: string;
@@ -11,8 +13,10 @@ export interface CompanyRejected {
   rejected_at: Date;
 }
 
+export type CompanyRejected = CamelCaseKeys<CompanyRejectedRow>;
+
 export interface CompanyRejectedCreate {
-  founder_uuid: string;
+  founderUuid: string;
   name: string;
   reason: string;
 }

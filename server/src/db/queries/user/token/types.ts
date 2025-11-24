@@ -1,4 +1,6 @@
-export interface UserToken {
+import { CamelCaseKeys } from "@/types/common";
+
+export interface UserTokenRow {
   /** Foreing key to users table */
   discord_id: string;
   /** Foreign key to crypto_tokens table */
@@ -7,13 +9,15 @@ export interface UserToken {
   price_at_purchase: string | null;
 }
 
+export type UserToken = CamelCaseKeys<UserTokenRow>;
+
 export interface UserTokenCreate {
-  discord_id: string;
-  token_id: number;
+  discordId: string;
+  tokenId: number;
   amount: string;
-  price_at_purchase?: string;
+  priceAtPurchase?: string;
 }
 
 export interface UserTokenWithPrice extends UserToken {
-  price_per_unit: string;
+  pricePerUnit: string;
 }

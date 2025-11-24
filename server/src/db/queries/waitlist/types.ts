@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the waitlist_emails table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface Waitlist {
+export interface WaitlistRow {
   id: number;
   email: string;
   submitted_at: Date | null;
@@ -10,9 +12,11 @@ export interface Waitlist {
   discord_name: string | null;
 }
 
+export type Waitlist = CamelCaseKeys<WaitlistRow>;
+
 export interface WaitlistCreate {
   email: string;
-  discord_name: string;
+  discordName: string;
 }
 
 export interface WaitlistSubmission {

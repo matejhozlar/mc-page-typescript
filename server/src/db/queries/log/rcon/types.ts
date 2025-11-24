@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the rcon_logs table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface LogRcon {
+export interface LogRconRow {
   id: number;
   /** Foreign key to users table */
   discord_id: string;
@@ -10,3 +12,5 @@ export interface LogRcon {
   command: string;
   executed_at: Date;
 }
+
+export type LogRcon = CamelCaseKeys<LogRconRow>;

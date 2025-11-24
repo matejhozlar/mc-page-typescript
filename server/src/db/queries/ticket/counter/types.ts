@@ -1,13 +1,17 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the ticket_counter table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface TicketCounter {
+export interface TicketCounterRow {
   id: number;
   last_number: number;
 }
 
+export type TicketCounter = CamelCaseKeys<TicketCounterRow>;
+
 export interface TicketCounterCreate {
   id?: number;
-  last_number: number;
+  lastNumber: number;
 }

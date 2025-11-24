@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the currency_transactions table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface CurrencyTransaction {
+export interface CurrencyTransactionRow {
   id: number;
   /** Foreign key to users table */
   uuid: string;
@@ -17,3 +19,5 @@ export interface CurrencyTransaction {
   balance_after: number | null;
   timestamp: Date | null;
 }
+
+export type CurrencyTransaction = CamelCaseKeys<CurrencyTransactionRow>;

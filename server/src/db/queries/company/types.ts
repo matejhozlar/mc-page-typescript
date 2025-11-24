@@ -1,8 +1,10 @@
+import { CamelCaseKeys } from "@/types/common";
+
 /**
  * Database row type for the companies table
  * Represents the exact structure returned from PostgreSQL Queries
  */
-export interface Company {
+export interface CompanyRow {
   id: number;
   /** Foreign key to users table */
   founder_uuid: string;
@@ -13,10 +15,12 @@ export interface Company {
   created_at: Date;
 }
 
+export type Company = CamelCaseKeys<CompanyRow>;
+
 export interface CompanyCreate {
-  founder_uuid: string;
+  founderUuid: string;
   name: string;
   description?: string;
-  short_description?: string;
+  shortDescription?: string;
   footer?: string;
 }
