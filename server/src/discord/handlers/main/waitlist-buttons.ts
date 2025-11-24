@@ -9,7 +9,7 @@ import {
 } from "discord.js";
 import logger from "@/logger";
 import { admins } from "@/db";
-import { sendInviteById } from "@/services/email/send-invite";
+import { sendInvite } from "@/services/email/invites";
 import { requireProduction } from "@/utils/guard/run-guard";
 import { memberHasRole } from "@/discord/utils/roles";
 
@@ -80,7 +80,7 @@ export async function handleWaitlistButton(
 
   try {
     if (action === "accept") {
-      const result = await sendInviteById(parseInt(rawId));
+      const result = await sendInvite(parseInt(rawId));
 
       if (!result.ok) {
         await interaction.editReply(
