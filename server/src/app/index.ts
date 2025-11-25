@@ -5,8 +5,6 @@ import rateLimit from "express-rate-limit";
 import { runInDevelopment } from "@/utils/guard/run-guard";
 import config from "@/config";
 import { AppDependencies } from "@/types/app/routes/dependencies";
-import { createRoutes } from "./routes";
-import logger from "@/logger";
 
 const limiter = rateLimit({
   windowMs: config.api.rateLimit.windowMs,
@@ -29,13 +27,6 @@ export function createApp(deps: AppDependencies): Express {
   runInDevelopment(() => {
     app.use(cors({ origin: true, credentials: true }));
   });
-
-  try {
-    app.use(createRoutes(deps));
-    logger.info("Routes registered");
-  } catch (error) {
-    logger.error("Failed to register routes:", error);
-  }
 
   return app;
 }
