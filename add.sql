@@ -339,4 +339,18 @@ ALTER COLUMN token_id SET NOT NULL;
 ALTER TABLE crypto_token_history_weekly
 ALTER COLUMN token_id SET NOT NULL;
 
+CREATE TABLE IF NOT EXISTS sessions (
+  id SERIAL PRIMARY KEY,
+  session_token VARCHAR(64) UNIQUE NOT NULL,
+  discord_id VARCHAR(255) NOT NULL,
+  session_type VARCHAR(50) NOT NULL, 
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  last_used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_sessions_token ON sessions(session_token);
+CREATE INDEX idx_sessions_expires ON sessions(expires_at);
+CREATE INDEX idx_sessions_discord_id ON sessions(discord_id);
+
 

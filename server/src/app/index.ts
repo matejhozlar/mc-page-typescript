@@ -4,6 +4,8 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import { runInDevelopment } from "@/utils/guard/run-guard";
 import config from "@/config";
+import logger from "@/logger";
+import { createRoutes } from "./routes";
 import { AppDependencies } from "@/types/app/routes/dependencies";
 
 const limiter = rateLimit({
@@ -27,6 +29,13 @@ export function createApp(deps: AppDependencies): Express {
   runInDevelopment(() => {
     app.use(cors({ origin: true, credentials: true }));
   });
+
+  try {
+    createRoutes(deps);
+    logger.info("Routes successfully registered");
+  } catch (error) {
+    logger.error("Failed to register routes:", error);
+  }
 
   return app;
 }
