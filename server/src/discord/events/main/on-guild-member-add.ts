@@ -1,5 +1,4 @@
 import type { GuildMember, TextChannel } from "discord.js";
-import logger from "@/logger";
 
 /**
  * Handles new member joins by assigning the "Unverified" role and sending instructions

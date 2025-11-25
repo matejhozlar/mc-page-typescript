@@ -1,6 +1,5 @@
 import type { Client } from "discord.js";
 import { ActivityType } from "discord.js";
-import logger from "@/logger";
 import { requireProduction } from "@/utils/guard/run-guard";
 
 /**

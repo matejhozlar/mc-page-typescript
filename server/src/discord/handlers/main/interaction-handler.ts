@@ -7,7 +7,6 @@ import type {
   Collection,
 } from "discord.js";
 import type { Pool } from "pg";
-import logger from "@/logger";
 import db from "@/db";
 import { handleWaitlistButton } from "./waitlist-buttons";
 import type { CommandModule } from "@/discord/loader/main/command-loader";

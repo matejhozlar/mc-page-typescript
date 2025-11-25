@@ -1,6 +1,5 @@
 import type { Client } from "discord.js";
-import logger from "@/logger";
-import { DiscordNotificationService } from "./discord-notification-service";
+import { DiscordNotificationService } from "./discord-notification.service";
 import {
   createWaitlistEmbed,
   createCompanySubmissionEmbed,

@@ -1,6 +1,5 @@
 import { Rcon } from "rcon-client";
 import type { RconConfig, RconCommandResult } from "@/types/common/rcon.types";
-import logger from "@/logger";
 
 function getRconConfig(): RconConfig {
   const host = process.env.COGS_AND_STEAM_SERVER_IP;

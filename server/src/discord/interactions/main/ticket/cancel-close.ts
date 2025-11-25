@@ -1,5 +1,4 @@
 import type { ButtonInteraction } from "discord.js";
-import logger from "@/logger";
 
 /**
  * Handles the cancellation of a ticket close operation

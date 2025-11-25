@@ -1,6 +1,5 @@
 import type { ButtonInteraction } from "discord.js";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
-import logger from "@/logger";
 import { isSendableChannel } from "@/discord/utils/channel-guard";
 
 /**

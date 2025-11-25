@@ -2,7 +2,6 @@ import OpenAI from "openai";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import fs from "node:fs/promises";
-import logger from "@/logger";
 import config from "@/config";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

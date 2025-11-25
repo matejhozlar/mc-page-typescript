@@ -1,4 +1,3 @@
-import logger from "@/logger";
 import { users } from "@/db";
 
 /**
@@ -17,8 +16,8 @@ export class PortfolioSnapshotService {
     try {
       const totalValue = await users.portfolio.value(discordId);
       await users.portfolio.create({
-        discord_id: discordId,
-        total_value: totalValue,
+        discordId: discordId,
+        totalValue: totalValue,
       });
 
       logger.info(`Portfolio snapshot created for ${discordId}: ${totalValue}`);

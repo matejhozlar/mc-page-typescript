@@ -8,7 +8,6 @@ import {
   MessageFlags,
   PermissionFlagsBits,
 } from "discord.js";
-import logger from "@/logger";
 import { tickets, users } from "@/db";
 import { TicketCreate } from "@/db/queries/ticket";
 
@@ -58,7 +57,7 @@ export default async function createTicket(
 
     if (existingTicket) {
       await interaction.reply({
-        content: `❌ You already have a ticket open: <#${existingTicket.channel_id}>`,
+        content: `❌ You already have a ticket open: <#${existingTicket.channelId}>`,
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -112,10 +111,10 @@ export default async function createTicket(
     });
 
     const newTicket: TicketCreate = {
-      ticket_number: ticketNumber,
-      discord_id: user.id,
-      mc_name: mcName,
-      channel_id: ticketChannel.id,
+      ticketNumber: ticketNumber,
+      discordId: user.id,
+      mcName: mcName,
+      channelId: ticketChannel.id,
     };
 
     await tickets.create(newTicket);

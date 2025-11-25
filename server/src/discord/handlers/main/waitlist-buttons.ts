@@ -7,7 +7,6 @@ import {
   MessageActionRowComponentBuilder,
   ComponentType,
 } from "discord.js";
-import logger from "@/logger";
 import { admins } from "@/db";
 import { sendInvite } from "@/services/email/invites";
 import { requireProduction } from "@/utils/guard/run-guard";

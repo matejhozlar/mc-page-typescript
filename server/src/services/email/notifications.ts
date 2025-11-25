@@ -1,5 +1,4 @@
-import logger from "@/logger";
-import { emailService } from "./email-service";
+import { emailService } from "./email.service";
 import config from "@/config";
 
 /**

@@ -4,7 +4,6 @@ import type {
   ActionRowBuilder,
   ButtonBuilder,
 } from "discord.js";
-import logger from "@/logger";
 import { isSendableChannel } from "@/discord/utils/channel-guard";
 
 export interface DiscordNotificationConfig {

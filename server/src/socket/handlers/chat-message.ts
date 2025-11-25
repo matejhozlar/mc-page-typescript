@@ -1,7 +1,6 @@
 import type { Socket } from "socket.io";
 import type { Server as SocketIOServer } from "socket.io";
 import type { Client } from "discord.js";
-import logger from "@/logger";
 import { sendMessage } from "@/discord/utils/send-to-channel";
 import { chat } from "@/db";
 

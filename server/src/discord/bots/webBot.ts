@@ -1,5 +1,4 @@
 import { Client, GatewayIntentBits } from "discord.js";
-import logger from "@/logger";
 import setRotatingStatuses from "@/discord/handlers/web/set-rotating-statuses";
 import rotatingStatuses from "@/discord/utils/rotating-statuses";
 import { registerWebListeners } from "@/discord/loader/web/listener-loader";

@@ -6,7 +6,6 @@ import type {
   PublicThreadChannel,
   DMChannel,
   VoiceChannel,
-  StageChannel,
 } from "discord.js";
 
 /**

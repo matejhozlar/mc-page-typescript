@@ -1,6 +1,5 @@
 import type { Client } from "discord.js";
 import { isSendableChannel } from "./channel-guard";
-import logger from "@/logger";
 
 /**
  * Sends a message to a Discord channel using a bot client

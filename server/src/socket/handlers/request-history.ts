@@ -1,6 +1,5 @@
 import type { Socket } from "socket.io";
 import type { Client, Message } from "discord.js";
-import logger from "@/logger";
 import { isTextChannel } from "@/discord/utils/channel-guard";
 
 /**

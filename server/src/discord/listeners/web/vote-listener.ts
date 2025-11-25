@@ -1,6 +1,5 @@
 import type { Client, Message } from "discord.js";
 import { requireProduction } from "@/utils/guard/run-guard";
-import logger from "@/logger";
 import { voteState } from "./utils/vote-state";
 
 /**

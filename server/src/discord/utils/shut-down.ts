@@ -1,5 +1,4 @@
 import type { Client } from "discord.js";
-import logger from "@/logger";
 import { sendBotNotification } from "@/discord/notifiers/send-bot-notification";
 
 /**

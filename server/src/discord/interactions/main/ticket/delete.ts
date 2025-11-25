@@ -1,6 +1,5 @@
 import type { ButtonInteraction, Client } from "discord.js";
 import { EmbedBuilder } from "discord.js";
-import logger from "@/logger";
 import { tickets } from "@/db";
 import { isSendableChannel } from "@/discord/utils/channel-guard";
 

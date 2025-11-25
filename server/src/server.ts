@@ -7,10 +7,12 @@ validateEnv();
 import http from "node:http";
 import { createApp } from "./app";
 import db from "./db";
-import logger from "@/logger";
+import loggerInstance from "./logger";
 import { initIO } from "./socket/io";
 import webBot from "./discord/bots/webBot";
 import { shutdownBot } from "./discord/utils/shut-down";
+
+global.logger = loggerInstance;
 
 const PORT = process.env.PORT;
 

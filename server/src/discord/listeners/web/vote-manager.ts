@@ -3,7 +3,6 @@ import type { Server as SocketIOServer } from "socket.io";
 import { sendRconCommand } from "@/utils/rcon/send-rcon";
 import { voteState } from "./utils/vote-state";
 import { requireProduction } from "@/utils/guard/run-guard";
-import logger from "@/logger";
 import config from "@/config";
 import type { VoteDetails, VoteInitiator } from "@/types/discord/vote.types";
 

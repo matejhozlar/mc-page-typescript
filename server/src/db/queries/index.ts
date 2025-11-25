@@ -14,3 +14,4 @@ export { SnapshotQueries } from "./snapshot";
 export { TicketQueries } from "./ticket";
 export { UserQueries } from "./user";
 export { WaitlistQueries } from "./waitlist";
+export { SessionQueries } from "./session";

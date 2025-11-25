@@ -1,6 +1,5 @@
 import type { Client, Message } from "discord.js";
 import type { Server as SocketIOServer } from "socket.io";
-import logger from "@/logger";
 
 /**
  * Message format emitted to Socket.IO clients

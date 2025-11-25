@@ -1,10 +1,12 @@
+import { SessionType } from "@/db/queries/session";
+
 declare global {
   namespace Express {
     interface Request {
-      user?: {
-        uuid: string;
-        name: string;
+      session?: {
+        id: number;
         discordId: string;
+        sessionType: SessionType;
       };
     }
   }

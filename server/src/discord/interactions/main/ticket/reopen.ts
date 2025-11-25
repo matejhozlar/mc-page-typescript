@@ -1,6 +1,5 @@
-import type { ButtonInteraction, Client } from "discord.js";
-import { EmbedBuilder, MessageFlags, PermissionFlagsBits } from "discord.js";
-import logger from "@/logger";
+import type { ButtonInteraction } from "discord.js";
+import { EmbedBuilder, MessageFlags } from "discord.js";
 import { tickets } from "@/db";
 import { isTextChannel } from "@/discord/utils/channel-guard";
 
@@ -37,7 +36,7 @@ export default async function reopenTicket(
       return;
     }
 
-    const { discord_id: originalUserId, admin_message_id: adminMessageId } =
+    const { discordId: originalUserId, adminMessageId: adminMessageId } =
       ticket;
 
     if (adminMessageId) {

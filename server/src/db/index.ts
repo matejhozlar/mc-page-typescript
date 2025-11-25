@@ -1,5 +1,4 @@
 import pg from "pg";
-import logger from "@/logger";
 import config from "@/config";
 import {
   AdminQueries,
@@ -13,6 +12,7 @@ import {
   LeaderboardQueries,
   LogQueries,
   LotteryQueries,
+  SessionQueries,
   ShopQueries,
   SnapshotQueries,
   TicketQueries,
@@ -66,5 +66,6 @@ export const snapshots = new SnapshotQueries(db);
 export const tickets = new TicketQueries(db);
 export const users = new UserQueries(db);
 export const waitlists = new WaitlistQueries(db);
+export const sessions = new SessionQueries(db);
 
 export default db;

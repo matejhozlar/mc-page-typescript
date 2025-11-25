@@ -1,6 +1,5 @@
 import type { Client, Message } from "discord.js";
 import { assistantService } from "@/services/ai";
-import logger from "@/logger";
 import { requireProduction } from "@/utils/guard/run-guard";
 import { users, logs } from "@/db";
 import { isDMChannel } from "@/discord/utils/channel-guard";
@@ -51,7 +50,7 @@ export default function setupAIChatListener(mainBot: Client): void {
       await message.reply(response);
 
       const params: LogAiCreate = {
-        discord_id: userId,
+        discordId: userId,
         message: message.content,
       };
 

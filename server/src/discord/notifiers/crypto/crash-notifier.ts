@@ -1,5 +1,4 @@
 import { Client, GatewayIntentBits, EmbedBuilder } from "discord.js";
-import logger from "@/logger";
 import { isSendableChannel } from "@/discord/utils/channel-guard";
 
 const { CLIENT_BOT_TOKEN, DISCORD_CRYPTO_CHANNEL_ID } = process.env;

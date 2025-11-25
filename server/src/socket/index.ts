@@ -2,7 +2,6 @@ import type { Server as SocketIOServer } from "socket.io";
 import type { Client } from "discord.js";
 import { registerSocketHandlers } from "./handlers";
 import relayDiscordMessages from "./relay-discord-messages";
-import logger from "@/logger";
 
 /**
  * Sets up Socket.IO event handling and Discord message relay

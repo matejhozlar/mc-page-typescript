@@ -1,6 +1,4 @@
 import type { Socket } from "socket.io";
-import logger from "@/logger";
-
 /**
  * Handles socket disconnection events
  *

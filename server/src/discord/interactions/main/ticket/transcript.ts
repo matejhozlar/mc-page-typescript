@@ -1,6 +1,5 @@
 import type { ButtonInteraction, Client, GuildMember } from "discord.js";
 import { AttachmentBuilder, EmbedBuilder } from "discord.js";
-import logger from "@/logger";
 import { tickets } from "@/db";
 import {
   isTextChannel,
@@ -62,21 +61,21 @@ export default async function transcriptTicket(
     }
 
     const member: GuildMember | null = await guild.members
-      .fetch(ticket.discord_id)
+      .fetch(ticket.discordId)
       .catch(() => null);
 
-    const displayName = member?.displayName || `Unknown (${ticket.discord_id})`;
+    const displayName = member?.displayName || `Unknown (${ticket.discordId})`;
 
     const transcriptHeader = `Ticket Transcript - ${
       channel.name
     }\n\nDiscord User: ${displayName} (${
-      ticket.discord_id
-    })\nMinecraft Username: ${ticket.mc_name || "Unknown"}\nTicket Number: ${
-      ticket.ticket_number
+      ticket.discordId
+    })\nMinecraft Username: ${ticket.mcName || "Unknown"}\nTicket Number: ${
+      ticket.ticketNumber
     }\nStatus: ${ticket.status || "Unknown"}\nCreated At: ${
-      ticket.created_at?.toISOString() || "Unknown"
+      ticket.createdAt?.toISOString() || "Unknown"
     }\nUpdated At: ${
-      ticket.updated_at?.toISOString() || "Unknown"
+      ticket.updatedAt?.toISOString() || "Unknown"
     }\n\n------------------------------------------------------------\n\n`;
 
     const fullTranscript = transcriptHeader + contentBody;

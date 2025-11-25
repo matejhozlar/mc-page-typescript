@@ -11,7 +11,7 @@ export interface SessionRow {
   id: number;
   session_token: string;
   discord_id: string;
-  type: SessionType;
+  sessionType: SessionType;
   created_at: Date;
   expires_at: Date;
   last_used_at: Date | null;
@@ -19,10 +19,21 @@ export interface SessionRow {
 
 export type Session = CamelCaseKeys<SessionRow>;
 
-export type SessionCreate = {
+export interface SessionCreate {
   sessionToken: string;
   discordId: string;
-  type: SessionType;
+  sessionType: SessionType;
   expiresAt: Date;
-  lastUsedAt?: Date;
-};
+}
+
+export interface SessionStart {
+  discordId: string;
+  sessionType: SessionType;
+}
+
+export interface SessionStats {
+  total: number;
+  active: number;
+  expired: number;
+  byType: Record<SessionType, number>;
+}

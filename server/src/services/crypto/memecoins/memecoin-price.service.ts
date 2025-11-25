@@ -9,7 +9,6 @@ import {
 import { crypto } from "@/db";
 import { sendCrashNotification } from "@/discord/notifiers/crypto/crash-notifier";
 import config from "@/config";
-import logger from "@/logger";
 import { CryptoTokenHistoryTable } from "@/db/queries/crypto/token/history";
 
 const UPWARD_BIAS = config.crypto.memecoins.upwardBias;
@@ -40,7 +39,7 @@ export class MemecoinPriceService {
       });
 
       for (const token of tokens) {
-        const price = parseFloat(token.price_per_unit);
+        const price = parseFloat(token.pricePerUnit);
         if (!Number.isFinite(price)) continue;
 
         if (price < CRASH_PRICE_THRESHOLD) {
@@ -65,7 +64,7 @@ export class MemecoinPriceService {
 
         await crypto.token.history.createInTable(
           CryptoTokenHistoryTable.MINUTELY,
-          { token_id: token.id, price: newPriceFormatted }
+          { tokenId: token.id, price: newPriceFormatted }
         );
         await this.checkAndTriggerAlerts(token.id, token.symbol, newPrice);
         await this.handleHourlySnapshot(token.id, newPriceFormatted);
@@ -98,13 +97,13 @@ export class MemecoinPriceService {
 
     for (const alert of alerts) {
       try {
-        const user = await this.mainBot.users.fetch(alert.discord_id);
+        const user = await this.mainBot.users.fetch(alert.discordId);
         await user.send(
           `Your alert for **${token.symbol}** has been cancelled — the token has **auto-crashed to $0**.`
         );
       } catch (error) {
         logger.warn(
-          `Failed to send crash alert DM to ${alert.discord_id}:`,
+          `Failed to send crash alert DM to ${alert.discordId}:`,
           error
         );
       }
@@ -163,7 +162,7 @@ export class MemecoinPriceService {
     });
 
     const triggeredAlerts = alerts.filter((alert) => {
-      const targetPrice = parseFloat(alert.target_price);
+      const targetPrice = parseFloat(alert.targetPrice);
       if (alert.direction === "above") {
         return newPrice >= targetPrice;
       } else {
@@ -176,11 +175,11 @@ export class MemecoinPriceService {
         await this.sendAlertNotification(alert, symbol, newPrice);
         await crypto.token.alert.delete({ id: alert.id });
 
-        logger.info(`Sent alert to ${alert.discord_id} for ${symbol}`);
+        logger.info(`Sent alert to ${alert.discordId} for ${symbol}`);
 
         await new Promise((resolve) => setTimeout(resolve, ALERT_DM_DELAY_MS));
       } catch (error) {
-        logger.warn(`Failed to send alert DM to ${alert.discord_id}:`, error);
+        logger.warn(`Failed to send alert DM to ${alert.discordId}:`, error);
       }
     }
   }
@@ -248,7 +247,7 @@ export class MemecoinPriceService {
 
     if (!hasRecent) {
       await crypto.token.history.createInTable(CryptoTokenHistoryTable.HOURLY, {
-        token_id: tokenId,
+        tokenId: tokenId,
         price: price,
       });
     }

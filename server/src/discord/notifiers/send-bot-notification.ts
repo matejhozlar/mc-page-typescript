@@ -1,6 +1,5 @@
 import type { Client } from "discord.js";
 import { isSendableChannel } from "../utils/channel-guard";
-import logger from "@/logger";
 
 /**
  * Sends a notification message to a specific Discord channel using a bot client

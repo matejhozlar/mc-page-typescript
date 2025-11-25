@@ -1,6 +1,5 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import logger from "../../logger";
 
 type MaybePromise = void | Promise<void>;
 

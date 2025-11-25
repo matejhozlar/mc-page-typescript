@@ -3,8 +3,6 @@ import type { Server as SocketIOServer } from "socket.io";
 import { scheduleCleanupJobs } from "./cleanup.job";
 import { scheduleCryptoJobs } from "./crypto.job";
 
-import logger from "@/logger";
-
 /**
  * Sets up all scheduled (cron) jobs required by the application,
  * such as reminders, cleanups, price updates, and quests

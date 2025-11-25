@@ -4,8 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { v4 as uuidv4 } from "uuid";
 import { InviteTemplate, TemplateEmailConfig } from "./types";
-import { emailService } from "./email-service";
-import logger from "@/logger";
+import { emailService } from "./email.service";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

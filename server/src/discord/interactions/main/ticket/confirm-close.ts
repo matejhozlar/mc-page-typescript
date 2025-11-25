@@ -11,7 +11,6 @@ import {
   MessageFlags,
   PermissionFlagsBits,
 } from "discord.js";
-import logger from "@/logger";
 import { isTextChannel } from "@/discord/utils/channel-guard";
 import { tickets } from "@/db";
 

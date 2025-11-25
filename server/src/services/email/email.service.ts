@@ -2,7 +2,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Transporter } from "nodemailer";
-import logger from "@/logger";
 import { createTransporter } from "./utils/transporter";
 import type { TemplateEmailConfig, DirectEmailConfig } from "./types";
 import config from "@/config";
