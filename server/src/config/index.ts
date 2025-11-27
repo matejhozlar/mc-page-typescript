@@ -8,6 +8,7 @@ import links from "./links.config";
 import services from "./services";
 import discord from "./discord";
 import crypto from "./crypto";
+import app from "./app";
 
 export default {
   api,
@@ -20,4 +21,5 @@ export default {
   services,
   discord,
   crypto,
+  app,
 };

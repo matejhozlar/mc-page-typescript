@@ -1,3 +1,5 @@
+import { NotFoundError } from "./errors";
+
 /**
  * Formats criteria object into readable string for error messages
  */
@@ -8,14 +10,13 @@ export function formatCriteria(criteria: Record<string, any>): string {
 }
 
 /**
- * Creates a standardized "not found" error message
+ * Creates a standardized "not found" error
  */
 export function createNotFoundError(
   entityName: string,
   criteria: Record<string, any>
-): Error {
-  const criteriaStr = formatCriteria(criteria);
-  return new Error(`${entityName} not found with ${criteriaStr}`);
+): NotFoundError {
+  return new NotFoundError(entityName, criteria);
 }
 
 /**

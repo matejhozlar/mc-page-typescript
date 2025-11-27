@@ -122,7 +122,7 @@ declare global {
       R2_SECRET_ACCESS_KEY: string;
       R2_ENDPOINT: string;
       // Prod
-      NODE_ENV: "production" | "development";
+      NODE_ENV: "production" | "development" | "test";
     }
   }
 }
