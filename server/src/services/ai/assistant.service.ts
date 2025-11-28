@@ -34,6 +34,7 @@ export class AssistantService {
    * Falls back to the default prompt if the file cannot be read
    *
    * @returns Promise resolving when the prompt is loaded or fallback is applied
+   * @private
    */
   private async loadSystemPrompt(): Promise<void> {
     try {
@@ -48,6 +49,7 @@ export class AssistantService {
    * Waits for the system prompt to finish loading before allowing further operations
    *
    * @returns Promise resolving when the prompt is ready for use
+   * @private
    */
   private async ensureReady(): Promise<void> {
     await this.promptLoaded;

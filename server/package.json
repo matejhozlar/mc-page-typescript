@@ -38,6 +38,7 @@
     "fast-glob": "^3.3.3",
     "fastify": "^5.6.1",
     "jsonwebtoken": "^9.0.2",
+    "minecraft-server-util": "^5.4.4",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.10",
