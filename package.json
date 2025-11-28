@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/matejhozlar/mc-page-typescript/issues"
   },
-  "homepage": "https://github.com/matejhozlar/mc-page-typescript#readme"
+  "homepage": "https://github.com/matejhozlar/mc-page-typescript#readme",
+  "dependencies": {
+    "openai": "^6.9.1"
+  }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "createrington-backend",
+  "name": "server",
   "version": "1.0.0",
   "description": "",
   "main": "server.ts",
@@ -27,19 +27,42 @@
   "author": "",
   "license": "ISC",
   "type": "module",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "discord.js": "^14.24.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "fast-glob": "^3.3.3",
+    "fastify": "^5.6.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.10",
+    "openai": "^6.8.1",
+    "pg": "^8.16.3",
+    "process": "^0.11.10",
+    "rcon-client": "^4.2.5",
+    "socket.io": "^4.8.1",
+    "uuid": "^13.0.0",
+    "winston": "^3.18.3",
+    "zod": "^4.1.12"
+  },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.4",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^24.9.1",
+    "@types/nodemailer": "^7.0.3",
+    "@types/pg": "^8.15.5",
+    "@vitest/coverage-v8": "^4.0.8",
     "copyfiles": "^2.4.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.14"
-  },
-  "dependencies": {
-    "discord.js": "^14.25.1",
-    "dotenv": "^17.2.3",
-    "fast-glob": "^3.3.3",
-    "minecraft-server-util": "^5.4.4",
-    "rcon-client": "^4.2.5",
-    "winston": "^3.18.3"
+    "vitest": "^4.0.8"
   }
 }
