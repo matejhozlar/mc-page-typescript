@@ -6,17 +6,13 @@ import type {
   ChatInputCommandInteraction,
   SlashCommandBuilder,
 } from "discord.js";
-import type { Pool } from "pg";
 
 /**
  * Discord command module structure
  */
 export interface CommandModule {
   data: SlashCommandBuilder;
-  execute: (
-    interaction: ChatInputCommandInteraction,
-    db: Pool
-  ) => Promise<void>;
+  execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
   prodOnly?: boolean;
 }
 

@@ -15,6 +15,7 @@
     "util:env-find": "node src/scripts/env/env-find.js",
     "util:import-find": "node src/scripts/dependency/import-find.js",
     "util:schema-info": "node src/scripts/db/get-table-info.js",
+    "util:deploy-commands": "node src/discord/deployer/deploy-commands.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

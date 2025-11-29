@@ -46,6 +46,36 @@ function resolveAlias(fileDir, importPath) {
   return importPath;
 }
 
+function processImport(importPath, fileDir, distDir) {
+  if (importPath.endsWith(".js")) {
+    return importPath;
+  }
+
+  if (!importPath.startsWith(".") && !importPath.startsWith("@/")) {
+    return importPath;
+  }
+
+  const resolvedImport = resolveAlias(fileDir, importPath);
+
+  const resolvedBase = path.resolve(fileDir, resolvedImport);
+  const relativeToBase = path.relative(distDir, resolvedBase);
+
+  const normalizedImport = normalizeImportPath(resolvedImport);
+
+  if (hasIndexFile(distDir, relativeToBase)) {
+    return `${normalizedImport}/index.js`;
+  }
+
+  if (fileExists(distDir, relativeToBase)) {
+    return `${normalizedImport}.js`;
+  }
+
+  console.warn(
+    `Could not resolve: ${importPath} in ${path.relative(distDir, fileDir)}`
+  );
+  return `${normalizedImport}.js`;
+}
+
 function fixImports(dir) {
   const files = fs.readdirSync(dir);
 
@@ -60,38 +90,10 @@ function fixImports(dir) {
       const fileDir = path.dirname(filePath);
 
       content = content.replace(
-        /from ['"]([^'"]+)['"];?/gm,
-        (match, importPath) => {
-          if (importPath.endsWith(".js")) {
-            return match;
-          }
-
-          if (!importPath.startsWith(".") && !importPath.startsWith("@/")) {
-            return match;
-          }
-
-          const resolvedImport = resolveAlias(fileDir, importPath);
-
-          const resolvedBase = path.resolve(fileDir, resolvedImport);
-          const relativeToBase = path.relative(distDir, resolvedBase);
-
-          const normalizedImport = normalizeImportPath(resolvedImport);
-
-          if (hasIndexFile(distDir, relativeToBase)) {
-            return `from '${normalizedImport}/index.js';`;
-          }
-
-          if (fileExists(distDir, relativeToBase)) {
-            return `from '${normalizedImport}.js';`;
-          }
-
-          console.warn(
-            `Could not resolve: ${importPath} in ${path.relative(
-              distDir,
-              filePath
-            )}`
-          );
-          return `from '${normalizedImport}.js';`;
+        /(from|import)\s+['"]([^'"]+)['"];?/gm,
+        (match, keyword, importPath) => {
+          const fixedPath = processImport(importPath, fileDir, distDir);
+          return `${keyword} '${fixedPath}';`;
         }
       );
 

@@ -1,14 +1,8 @@
-import dotenv from "dotenv";
-dotenv.config({ quiet: true });
-
-import { validateEnv } from "./utils/env/env-validate";
-validateEnv();
-
+import "./bootstrap";
 import http from "node:http";
 import { createApp } from "./app";
-import loggerInstance from "./logger";
-
-global.logger = loggerInstance;
+import { MinecraftStatusManager } from "./services/minecraft-status";
+import mainBot from "./discord/bots/main";
 
 const PORT = parseInt(process.env.PORT);
 
@@ -53,3 +47,12 @@ function start(): void {
 }
 
 start();
+
+logger.info(mainBot);
+
+const statusManger = MinecraftStatusManager.getInstance(
+  process.env.COGS_AND_STEAM_SERVER_IP,
+  parseInt(process.env.COGS_AND_STEAM_SERVER_PORT),
+  parseInt(process.env.COGS_AND_STEAM_QUERY_PORT)
+);
+statusManger.start();

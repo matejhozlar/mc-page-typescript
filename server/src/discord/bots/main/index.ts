@@ -1,4 +1,6 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
+import { loadCommandHandlers } from "./loaders/command-loader";
+import { registerInteractionHandler } from "./handlers/interaction-handler";
 
 const mainBot = new Client({
   intents: [
@@ -20,8 +22,13 @@ mainBot.once("clientReady", async () => {
   logger.info("Logged in as", mainBot.user.tag);
 });
 
-await mainBot.login(process.env.DISCORD_MAIN_BOT_TOKEN).catch((error) => {
-  logger.error("Failed to login:", error);
+(async () => {
+  const commandHandlers = await loadCommandHandlers();
+  registerInteractionHandler(mainBot, commandHandlers);
+
+  await mainBot.login(process.env.DISCORD_MAIN_BOT_TOKEN);
+})().catch((error) => {
+  logger.error("Failed to initialize:", error);
   process.exit(1);
 });
 
