@@ -1,2 +1,3 @@
 import logger from "./logger.config";
-export default { logger };
+import colors from "./colors.config";
+export default { logger, colors };

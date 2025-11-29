@@ -1,4 +1,4 @@
-import { EmbedPresets } from "@/discord/embeds/embed-presets";
+import { EmbedPresets } from "@/discord/embeds";
 import { MinecraftStatusManager } from "@/services/minecraft-status";
 import {
   ChatInputCommandInteraction,
@@ -51,12 +51,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const embed = EmbedPresets.minecraftServerInfo(status, {
-    serverName: process.env.SERVER_NAME,
-    serverDomain: process.env.SERVER_DOMAIN,
-    guildId: interaction.guild?.id,
-    ticketChannelId: process.env.DISCORD_TICKET_MESSAGE_CHANNEL_ID,
-  }).build();
+  const embed = EmbedPresets.commands
+    .ip(status, process.env.SERVER_NAME, process.env.SERVER_DOMAIN)
+    .build();
 
   await interaction.editReply({ embeds: [embed] });
 }
