@@ -28,7 +28,8 @@ export const prodOnly = false;
  * Creates a Discord embed showing:
  * - Link to the live web map
  *
- * @param interaction
+ * @param interaction - The Discord slash command interaction
+ * @returns Promise resolving when the reply has been sent
  */
 export async function execute(interaction: ChatInputCommandInteraction) {
   const embed = EmbedPresets.commands.map();

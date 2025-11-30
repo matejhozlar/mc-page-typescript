@@ -1,4 +1,8 @@
-import "./bootstrap";
+import "./env";
+import loggerInstance from "./logger";
+global.logger = loggerInstance;
+import { validateEnv } from "./utils/env/env-validate";
+validateEnv();
 import http from "node:http";
 import { createApp } from "./app";
 import { MinecraftStatusManager } from "./services/minecraft-status";

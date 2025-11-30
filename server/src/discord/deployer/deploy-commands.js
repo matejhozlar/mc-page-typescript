@@ -26,6 +26,11 @@ const commands = [
     .setDescription(
       `Get the modpack for ${process.env.WEB_MODPACK_URL} server`
     ),
+  new SlashCommandBuilder()
+    .setName("list")
+    .setDescription(
+      `Shows the list of players currently online on ${process.env.SERVER_NAME} server`
+    ),
 ].map((cmd) => cmd.toJSON());
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);

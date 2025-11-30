@@ -53,4 +53,40 @@ export const CommandEmbedPresets = {
 
     return embed;
   },
+
+  list(status?: MinecraftStatus) {
+    const embed = createEmbed()
+      .title("Minecraft Server Status")
+      .color(status?.online ? EmbedColors.Success : EmbedColors.Error);
+
+    if (!status?.online) {
+      embed.description("Server is currently offline");
+      return embed;
+    }
+
+    addStatusField(embed, status);
+
+    if (status.players.length > 0) {
+      const playerList = status.players.map((p) => `• ${p.name}`).join("\n");
+      embed.field(
+        `Online Players (${status.players.length})`,
+        playerList.length > 1024
+          ? playerList.substring(0, 1021) + "..."
+          : playerList,
+        false
+      );
+    } else if (status.playerCount > 0) {
+      embed.field(
+        "Players Online",
+        `${status.playerCount} player(s) online\n*Player names not available*`,
+        false
+      );
+    } else {
+      embed.field("Players Online", "No players currently online", false);
+    }
+
+    embed.timestamp(Date.now());
+
+    return embed;
+  },
 };
