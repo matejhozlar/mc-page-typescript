@@ -2,49 +2,54 @@ import { createEmbed } from "../../embed-builder";
 import { EmbedColors } from "../../colors";
 import type { MinecraftStatus } from "@/services/minecraft-status";
 import { addSupportTicketField } from "../../helpers";
+import { addStatusField } from "../../helpers";
+import config from "@/config";
+
+const SERVER_NAME = config.minecraft.server.serverName;
+const SERVER_DOMAIN = config.minecraft.server.serverDomain;
+const MODPACK_URL = config.links.modpack;
 
 export const CommandEmbedPresets = {
-  ip(status: MinecraftStatus, serverName: string, serverDomain: string) {
-    const embed = createEmbed()
-      .title(`${serverName}`)
-      .color(status.online ? EmbedColors.Success : EmbedColors.Error);
+  ip(status?: MinecraftStatus) {
+    const color = !status
+      ? EmbedColors.Info
+      : status.online
+      ? EmbedColors.Success
+      : EmbedColors.Error;
 
-    if (status.online) {
-      embed.fields([
-        {
-          name: "Status",
-          value: "🟢 Online",
-          inline: true,
-        },
-        {
-          name: "Players",
-          value: `${status.playerCount}/${status.maxPlayers}`,
-          inline: true,
-        },
-        {
-          name: "Version",
-          value: status.version || "Unknown",
-          inline: true,
-        },
-      ]);
-    } else {
-      embed.field("Status", "🔴 Offline", true);
-    }
+    const embed = createEmbed().title(`${SERVER_NAME}`).color(color);
 
-    embed.field("Server Address", `\`\`\`${serverDomain}\`\`\``, false);
+    addStatusField(embed, status);
 
-    if (status.online && status.motd.trim() !== "") {
-      const motd =
-        status.motd.length > 1024
-          ? status.motd.substring(0, 1021) + "..."
-          : status.motd;
-
-      embed.field("Message of the Day", motd, false);
-    }
+    embed.field("Server Address", `\`\`\`${SERVER_DOMAIN}\`\`\``, false);
 
     addSupportTicketField(embed);
 
     embed.timestamp(Date.now());
+
+    return embed;
+  },
+
+  map() {
+    const embed = createEmbed()
+      .title("🗺️ Live Server Map")
+      .description(`Explore the ${SERVER_NAME} world in real time`)
+      .color(EmbedColors.Info)
+      .url(config.links.map)
+      .timestamp(Date.now());
+
+    return embed;
+  },
+
+  modpack() {
+    const embed = createEmbed()
+      .title(`🛠 ${SERVER_NAME} modpack`)
+      .description(
+        `Download the ${SERVER_NAME} modpack through CurseForge with just 1 click`
+      )
+      .color(EmbedColors.Info)
+      .url(MODPACK_URL)
+      .timestamp(Date.now());
 
     return embed;
   },

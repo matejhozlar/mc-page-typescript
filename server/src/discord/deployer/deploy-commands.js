@@ -18,6 +18,14 @@ const commands = [
     .setDescription(
       `Get connection details and status for ${process.env.MC_SERVER_NAME} server`
     ),
+  new SlashCommandBuilder()
+    .setName("map")
+    .setDescription(`View the live map for ${process.env.SERVER_NAME} server`),
+  new SlashCommandBuilder()
+    .setName("modpack")
+    .setDescription(
+      `Get the modpack for ${process.env.WEB_MODPACK_URL} server`
+    ),
 ].map((cmd) => cmd.toJSON());
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);

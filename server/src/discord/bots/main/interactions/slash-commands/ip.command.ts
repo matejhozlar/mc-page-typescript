@@ -2,6 +2,7 @@ import { EmbedPresets } from "@/discord/embeds";
 import { MinecraftStatusManager } from "@/services/minecraft-status";
 import {
   ChatInputCommandInteraction,
+  EmbedBuilder,
   MessageFlags,
   SlashCommandBuilder,
 } from "discord.js";
@@ -22,7 +23,7 @@ export const data = new SlashCommandBuilder()
 export const prodOnly = false;
 
 /**
- * Execute the /ip command to display Minecraft server connection information
+ * Execute the /ip command
  *
  * Creates a Discord embed showing:
  * - Server status (online/offline)
@@ -40,20 +41,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const statusManager = MinecraftStatusManager.getInstance();
   const status = statusManager.getStatus();
+  let embed: EmbedBuilder;
 
   if (!status) {
-    const errorEmbed = EmbedPresets.error(
-      "Status unavailable",
-      "Unable to fetch server status, please try again later"
-    ).build();
+    embed = EmbedPresets.commands.ip().build();
 
-    await interaction.editReply({ embeds: [errorEmbed] });
+    await interaction.editReply({ embeds: [embed] });
     return;
   }
 
-  const embed = EmbedPresets.commands
-    .ip(status, process.env.SERVER_NAME, process.env.SERVER_DOMAIN)
-    .build();
+  embed = EmbedPresets.commands.ip(status).build();
 
   await interaction.editReply({ embeds: [embed] });
 }
