@@ -1,10 +1,10 @@
-import type {
-  Channel,
-  TextChannel,
+import {
+  DMChannel,
   NewsChannel,
   PrivateThreadChannel,
   PublicThreadChannel,
-  DMChannel,
+  TextChannel,
+  Channel,
   VoiceChannel,
 } from "discord.js";
 
@@ -62,7 +62,7 @@ export function isVoiceChannel(
  */
 export function isThreadChannel(
   channel: Channel | null
-): channel is PrivateThreadChannel | PublicThreadChannel {
+): channel is PrivateThreadChannel {
   return channel !== null && channel.isThread();
 }
 

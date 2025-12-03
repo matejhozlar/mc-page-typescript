@@ -1,15 +1,21 @@
-import "./env";
-import loggerInstance from "./logger";
-global.logger = loggerInstance;
-import { validateEnv } from "./utils/env/env-validate";
-validateEnv();
+import { env } from "./config/env/env.config";
+import "./logger.global";
 import http from "node:http";
 import { createApp } from "./app";
-import { MinecraftStatusManager } from "./services/minecraft-status";
+import config from "./config";
 import mainBot from "./discord/bots/main";
 
-const PORT = parseInt(process.env.PORT);
+const PORT = config.app.port;
 
+/**
+ * Gracefully shuts down the HTTP server and exits the process
+ *
+ * This function attempts to close all connections and stop the server gracefully
+ * If successful, exits with code 0; if an error occurs, exits with code 1
+ *
+ * @param httpServer - The HTTP server instance to shut down
+ * @returns Promise resolving when the shutdown is complete
+ */
 async function shutdown(httpServer: http.Server): Promise<void> {
   logger.info("Shutting down...");
 
@@ -24,6 +30,17 @@ async function shutdown(httpServer: http.Server): Promise<void> {
   }
 }
 
+/**
+ * Sets up process event handlers for graceful shutdown and error handling
+ *
+ * Registers handlers for:
+ * - SIGINT: Graceful shutdown on Ctrl+C
+ * - SIGTERM: Graceful shutdown on termination signal
+ * - unhandledRejection: Catches unhandled promise rejections
+ * - uncaughtException: Catches uncaught exceptions
+ *
+ * @param httpServer - The HTTP server instance to manage
+ */
 function setupProcessHandlers(httpServer: http.Server): void {
   process.on("SIGINT", () => shutdown(httpServer));
   process.on("SIGTERM", () => shutdown(httpServer));
@@ -39,6 +56,15 @@ function setupProcessHandlers(httpServer: http.Server): void {
   });
 }
 
+/**
+ * Initializes and starts the HTTP server
+ *
+ * This function:
+ * 1. Creates the Express application
+ * 2. Creates an HTTP server instance
+ * 3. Sets up process handlers for graceful shutdown
+ * 4. Starts listening on the configured PORT
+ */
 function start(): void {
   const app = createApp();
   const httpServer = http.createServer(app);
@@ -46,17 +72,10 @@ function start(): void {
   setupProcessHandlers(httpServer);
 
   httpServer.listen(PORT, () => {
-    logger.info(`Server running at http://localhost:${PORT}`);
+    logger.info(`Server started at http://localhost:${PORT}`);
   });
 }
 
 start();
 
 logger.info(mainBot);
-
-const statusManger = MinecraftStatusManager.getInstance(
-  process.env.COGS_AND_STEAM_SERVER_IP,
-  parseInt(process.env.COGS_AND_STEAM_SERVER_PORT),
-  parseInt(process.env.COGS_AND_STEAM_QUERY_PORT)
-);
-statusManger.start();

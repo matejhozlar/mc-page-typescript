@@ -1,11 +1,15 @@
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
-import { Collection } from "discord.js";
-import type {
+import config from "@/config";
+import { CooldownType } from "@/discord/utils/cooldown/cooldown-manager";
+import {
   ChatInputCommandInteraction,
+  Collection,
   SlashCommandBuilder,
 } from "discord.js";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import fs from "node:fs";
+
+const isDev = config.envMode.isDev;
 
 /**
  * Discord command module structure
@@ -14,20 +18,27 @@ export interface CommandModule {
   data: SlashCommandBuilder;
   execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
   prodOnly?: boolean;
+
+  // Cooldown configuration
+  cooldown?: {
+    duration: number; // in seconds
+    type: CooldownType;
+    message?: string; // Custom cooldown message
+    bypassRoles?: string[]; // Role IDs that bypass cooldown
+    bypassUsers?: string[]; // User IDs that bypass cooldown
+  };
 }
 
 /**
- * Loads Discord command handlers from discord/commands folder
+ * Loads Discord command handlers
+ * from discord/bots/main/interactions/slash-commands folder
  *
- * @returns commandHandlers
+ * @returns Promise resolving to the commandHandlers
  */
 export async function loadCommandHandlers(): Promise<
   Collection<string, CommandModule>
 > {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-
-  const isDev = process.env.NODE_ENV !== "production";
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
   const commandsPath = path.join(
     __dirname,
@@ -37,7 +48,7 @@ export async function loadCommandHandlers(): Promise<
   );
   const commandFiles = fs
     .readdirSync(commandsPath)
-    .filter((file) => file.endsWith(".ts"));
+    .filter((file) => (isDev ? file.endsWith(".ts") : file.endsWith(".js")));
 
   const commandHandlers = new Collection<string, CommandModule>();
 
@@ -48,21 +59,35 @@ export async function loadCommandHandlers(): Promise<
         pathToFileURL(filePath).href
       )) as CommandModule;
 
-      const isValid =
-        commandModule.data && typeof commandModule.execute === "function";
-      const isProdOnly = commandModule.prodOnly === true;
-
-      if (!isValid) {
-        logger.warn(`Skipped loading file ${file} - missing data or execute()`);
+      if (!commandModule.data) {
+        logger.warn(`Skipped ${file}: missing 'data' export`);
         continue;
       }
 
+      if (typeof commandModule.execute !== "function") {
+        logger.warn(`Skipped ${file}: 'execute' is not a function`);
+        continue;
+      }
+
+      if (!commandModule.data.name) {
+        logger.warn(`Skipped ${file}: command has no name`);
+        continue;
+      }
+
+      const isProdOnly = commandModule.prodOnly === true;
+
       if (isDev && isProdOnly) {
-        logger.warn(`Skipped production-only command: ${file}`);
+        logger.warn(`Skipped loading production only command: ${file}`);
         continue;
       }
 
       commandHandlers.set(commandModule.data.name, commandModule);
+
+      if (commandModule.cooldown) {
+        logger.debug(
+          `Command ${commandModule.data.name} has ${commandModule.cooldown.type} cooldown: ${commandModule.cooldown.duration}s`
+        );
+      }
     } catch (error) {
       logger.error(`Failed to load command ${file}:`, error);
     }

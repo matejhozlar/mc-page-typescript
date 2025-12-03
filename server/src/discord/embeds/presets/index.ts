@@ -1,5 +1,5 @@
-import { CommandEmbedPresets } from "./commands";
-import { CommonEmbedPresets } from "./common";
+import { CommandEmbedPresets } from "./command-presets";
+import { CommonEmbedPresets } from "./common-presets";
 
 export const EmbedPresets = {
   ...CommonEmbedPresets,

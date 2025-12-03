@@ -1,11 +1,12 @@
 import { EmbedBuilder, Message, TextChannel } from "discord.js";
-import { EmbedPresets } from "../embeds/embed-presets";
+import { EmbedPresets } from "../embeds";
+
 /**
  * Sends an embed message to a Discord text channel
  *
  * @param channel - The text channel to send the embed to
- * @param embed - The embed builder containing the embed content
- * @returns The sent message if successful, null if failed
+ * @param embed - The embed builder containing embed content
+ * @returns Promise resolving to the sent message, or null if failed
  */
 export async function sendEmbed(
   channel: TextChannel,
@@ -18,12 +19,13 @@ export async function sendEmbed(
     return null;
   }
 }
+
 /**
  * Replies to a message with an embed
  *
- * @param message - The message to reply to
+ * @param message - Text message to reply to
  * @param embed - The embed builder containing the embed content
- * @returns The reply message if successful, null if failed
+ * @returns Promise resolving to the replied message, or null if failed
  */
 export async function replyWithEmbed(
   message: Message,
@@ -36,12 +38,13 @@ export async function replyWithEmbed(
     return null;
   }
 }
+
 /**
- * Edits an existing message to display a new embed
+ * Edits an existing embed message to display a new embed
  *
  * @param message - The message to edit
  * @param embed - The embed builder containing the new embed content
- * @returns The edited message if successful, null if failed
+ * @returns Promise resolving to the edited message, or null if failed
  */
 export async function editEmbed(
   message: Message,
@@ -54,6 +57,7 @@ export async function editEmbed(
     return null;
   }
 }
+
 /**
  * Executes an async operation with a loading embed that updates based on the result
  * Displays a loading message, executes the operation, then updates the embed on success or error
@@ -65,7 +69,7 @@ export async function editEmbed(
  * @param options.loadingMessage - Optional custom loading message text
  * @param options.onSuccess - Optional callback to generate success embed from result
  * @param options.onError - Optional callback to generate error embed from error
- * @returns The result of the operation
+ * @returns Promise resolving to the result of the operation
  * @throws Re-throws any error from the operation after updating the embed
  */
 export async function withLoadingEmbed<T>(
